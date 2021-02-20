@@ -3,10 +3,8 @@ package com.dsige.lectura.dominion.ui.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.speech.RecognizerIntent
 import android.view.*
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.ViewModelProvider
@@ -20,7 +18,6 @@ import com.dsige.lectura.dominion.data.local.model.*
 import com.dsige.lectura.dominion.data.viewModel.SuministroViewModel
 import com.dsige.lectura.dominion.data.viewModel.ViewModelFactory
 import com.dsige.lectura.dominion.helper.Gps
-import com.dsige.lectura.dominion.helper.Permission
 import com.dsige.lectura.dominion.helper.Util
 import com.dsige.lectura.dominion.ui.adapters.MenuItemAdapter
 import com.dsige.lectura.dominion.ui.adapters.MotivoAdapter
@@ -69,9 +66,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var titulo: String = ""
     private var estado: Int = 0
 
-    private var tipo: Int = 0
     private var online: Int = 0
-    private var operarioId: Int = 0
 
     // Se utiliza para Lectura Recuperadas
     private var recuperada = 0
@@ -125,7 +120,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
         suministroViewModel.user.observe(this) {
             online = it.operario_EnvioEn_Linea
-            operarioId = it.iD_Operario
+            r.iD_Operario = it.iD_Operario
         }
 
         getLecturaByOrden(orden)
@@ -376,15 +371,15 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     }
                 }
 
-                if (r.parentId != 0) {
+                if (r.parentId == 0) {
                     suministroViewModel.setError("Eliga un resultado")
                     return
                 }
 
-                if (r.codigo_Resultado.isNotEmpty()) {
-                    suministroViewModel.setError("Eliga una causa")
-                    return
-                }
+//                if (r.codigo_Resultado.isEmpty()) {
+//                    suministroViewModel.setError("Eliga una causa")
+//                    return
+//                }
 
                 if (pideLectura == "SI") {
                     if (editTextLectura.text.toString().isEmpty()) {
@@ -398,7 +393,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 r.fecha_Sincronizacion_Android = r.registro_Fecha_SQLITE
                 r.registro_TieneFoto = "1"
                 r.estado = 2
-                r.tipo = if (recuperada == 10) 10 else tipo
+                r.tipo = if (recuperada == 10) 10 else estado
                 suministroViewModel.insertRegistro(r)
             }
         } else {
@@ -411,7 +406,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
         intent.putExtra("envioId", r.iD_Suministro)
         intent.putExtra("orden", orden)
         intent.putExtra("orden_2", ordenOperario)
-        intent.putExtra("tipo", if (estado == 10) 10 else tipo)
+        intent.putExtra("tipo", if (estado == 10) 10 else estado)
         intent.putExtra("estado", estado)
         intent.putExtra("nombre", titulo)
         intent.putExtra("suministro", contrato.trim())

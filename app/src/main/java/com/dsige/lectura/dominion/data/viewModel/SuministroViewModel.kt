@@ -188,11 +188,26 @@ internal constructor(private val roomRepository: AppRepository, private val retr
 
     fun deletePhoto(p: Photo, context: Context) {
         roomRepository.deletePhoto(p, context)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : CompletableObserver {
+                override fun onSubscribe(d: Disposable) {}
+                override fun onComplete() {}
+                override fun onError(e: Throwable) {}
+            })
     }
 
     fun generarArchivo(
-        nameImg: String, context: Context, data: Intent, fechaAsignacion: String, direccion: String,
-        distrito: String, latitud: String, longitud: String, receive: Int, tipo: Int
+        nameImg: String,
+        context: Context,
+        data: Intent?,
+        fechaAsignacion: String,
+        direccion: String,
+        distrito: String,
+        latitud: String,
+        longitud: String,
+        receive: Int,
+        tipo: Int
     ) {
         Util.getPhotoAdjunto(
             nameImg, context, data, fechaAsignacion, direccion,
@@ -218,7 +233,12 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : CompletableObserver {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onComplete() {}
+                override fun onComplete() {
+                    if (p.firm == 1) {
+                        mensajeSuccess.value = "Firma Guardado"
+                    }
+                }
+
                 override fun onError(e: Throwable) {}
             })
     }
@@ -361,5 +381,17 @@ internal constructor(private val roomRepository: AppRepository, private val retr
 
     fun getRegistros(): LiveData<List<Registro>> {
         return roomRepository.getRegistros()
+    }
+
+    fun getSuministroLecturaById(id: Int): LiveData<SuministroLectura> {
+        return roomRepository.getSuministroLecturaById(id)
+    }
+
+    fun getSuministroCorteById(id: Int): LiveData<SuministroCortes> {
+        return roomRepository.getSuministroCorteById(id)
+    }
+
+    fun getSuministroReconexionById(id: Int): LiveData<SuministroReconexion> {
+        return roomRepository.getSuministroReconexionById(id)
     }
 }

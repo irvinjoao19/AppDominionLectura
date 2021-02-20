@@ -25,7 +25,7 @@
             app:ibv_badgeColor="@color/colorRed"
             app:ibv_badgeLimitValue="false"
             app:ibv_badgeTextColor="@color/colorWhite"
-            app:ibv_badgeTextSize="12sp"
+            app:ibv_badgeTextSize="17sp"
             app:ibv_badgeTextStyle="bold"
             app:ibv_badgePadding="2dp"
             app:srcCompat="@drawable/ic_search"

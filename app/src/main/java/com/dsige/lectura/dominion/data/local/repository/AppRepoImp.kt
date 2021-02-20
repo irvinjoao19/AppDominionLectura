@@ -650,4 +650,16 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
         return dataBase.photoDao().getPhotos()
     }
 
+    override fun getSuministroLecturaById(id: Int): LiveData<SuministroLectura> {
+    return dataBase.lecturaDao().getSuministroLecturaById(id)
+    }
+
+    override fun getSuministroCorteById(id: Int): LiveData<SuministroCortes> {
+        return dataBase.corteDao().getSuministroCorteById(id)
+    }
+
+    override fun getSuministroReconexionById(id: Int): LiveData<SuministroReconexion> {
+        return dataBase.reconexionDao().getSuministroReconexionById(id)
+    }
+
 }

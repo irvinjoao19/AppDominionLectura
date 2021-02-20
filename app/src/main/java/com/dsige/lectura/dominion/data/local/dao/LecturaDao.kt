@@ -70,4 +70,7 @@ interface LecturaDao {
 
     @Query("UPDATE SuministroLectura SET activo =:i WHERE iD_Suministro =:id")
     fun updateActivoSuministroLectura(id: Int, i: Int)
+
+    @Query("SELECT * FROM SuministroLectura WHERE iD_Suministro =:id")
+    fun getSuministroLecturaById(id: Int): LiveData<SuministroLectura>
 }

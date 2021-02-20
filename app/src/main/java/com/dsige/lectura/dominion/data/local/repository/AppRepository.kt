@@ -97,5 +97,10 @@ interface AppRepository {
     fun getPhotos(): LiveData<List<Photo>>
 
 
+    //Mapa
+    fun getSuministroLecturaById(id: Int): LiveData<SuministroLectura>
+    fun getSuministroCorteById(id: Int): LiveData<SuministroCortes>
+    fun getSuministroReconexionById(id: Int): LiveData<SuministroReconexion>
+
 
 }

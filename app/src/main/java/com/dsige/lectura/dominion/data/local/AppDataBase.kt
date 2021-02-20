@@ -22,7 +22,7 @@ import com.dsige.lectura.dominion.data.local.model.*
         GrandesClientes::class,
         Marca::class
     ],
-    version = 2, // version 1 en play store
+    version = 4, // version 1 en play store
     exportSchema = false
 )
 abstract class AppDataBase : RoomDatabase() {

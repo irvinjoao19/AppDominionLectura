@@ -54,4 +54,7 @@ interface CorteDao {
 
     @Query("SELECT * FROM SuministroCortes WHERE orden=:orden")
     fun suministroCorteByOrden(orden: Int): SuministroCortes
+
+    @Query("SELECT * FROM SuministroCortes WHERE iD_Suministro =:id")
+    fun getSuministroCorteById(id: Int): LiveData<SuministroCortes>
 }

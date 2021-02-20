@@ -43,6 +43,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
             R.id.editTextArtefacto -> dialogSpinner(3)
             R.id.editTextResultado -> dialogSpinner(4)
             R.id.editTextUbicacion -> dialogSpinner(5)
+            R.id.editTextCausa -> dialogSpinner(6)
         }
     }
 
@@ -69,8 +70,6 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var ordenOperario: Int = 0
     private var titulo: String = ""
     private var estado: Int = 0
-
-    private var tipo: Int = 0
     private var online: Int = 0
     private var operarioId: Int = 0
 
@@ -126,7 +125,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
         suministroViewModel.user.observe(this) {
             online = it.operario_EnvioEn_Linea
-            operarioId = it.iD_Operario
+            r.iD_Operario = it.iD_Operario
         }
 
         getLecturaByOrden(orden)
@@ -386,17 +385,17 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     }
                 }
 
-                if (r.motivoId != 0){
+                if (r.motivoId == 0){
                     suministroViewModel.setError("Eliga un motivo")
                     return
                 }
 
-                if (r.parentId != 0) {
+                if (r.parentId == 0) {
                     suministroViewModel.setError("Eliga un resultado")
                     return
                 }
 
-                if (r.codigo_Resultado.isNotEmpty()) {
+                if (r.codigo_Resultado.isEmpty()) {
                     suministroViewModel.setError("Eliga una causa")
                     return
                 }
@@ -413,7 +412,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 r.fecha_Sincronizacion_Android = r.registro_Fecha_SQLITE
                 r.registro_TieneFoto = "1"
                 r.estado = 2
-                r.tipo = if (recuperada == 10) 10 else tipo
+                r.tipo = if (recuperada == 10) 10 else estado
                 suministroViewModel.insertRegistro(r)
             }
         } else {
@@ -426,7 +425,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
         intent.putExtra("envioId", r.iD_Suministro)
         intent.putExtra("orden", orden)
         intent.putExtra("orden_2", ordenOperario)
-        intent.putExtra("tipo", if (estado == 10) 10 else tipo)
+        intent.putExtra("tipo", if (estado == 10) 10 else estado)
         intent.putExtra("estado", estado)
         intent.putExtra("nombre", titulo)
         intent.putExtra("suministro", contrato.trim())

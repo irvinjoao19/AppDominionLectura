@@ -28,6 +28,7 @@ import com.dsige.lectura.dominion.data.local.model.SuministroLectura
 import com.dsige.lectura.dominion.data.viewModel.SuministroViewModel
 import com.dsige.lectura.dominion.data.viewModel.ViewModelFactory
 import com.dsige.lectura.dominion.helper.Gps
+import com.dsige.lectura.dominion.helper.Permission
 import com.dsige.lectura.dominion.helper.Util
 import com.dsige.lectura.dominion.ui.adapters.PhotoAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -328,52 +329,55 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     e.printStackTrace()
                 }
             }
-            startActivityForResult(takePictureIntent, tipo)
+            startActivityForResult(takePictureIntent, Permission.CAMERA_REQUEST)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            if (data != null) {
+        if (requestCode == Permission.CAMERA_REQUEST && resultCode == RESULT_OK) {
+
                 val gps = Gps(this)
                 if (gps.isLocationEnabled()) {
-                    try {
-                        val addressObservable = Observable.just(
-                            Geocoder(this)
-                                .getFromLocation(
-                                    gps.getLatitude(), gps.getLongitude(), 1
-                                )[0]
-                        )
-                        addressObservable.subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(object : Observer<Address> {
-                                override fun onSubscribe(d: Disposable) {}
-                                override fun onNext(address: Address) {
-                                    suministroViewModel.generarArchivo(
-                                        nameImg,
-                                        this@PhotoActivity,
-                                        data,
-                                        fechaAsignacion,
-                                        address.getAddressLine(0).toString(),
-                                        address.locality.toString(),
-                                        gps.getLatitude().toString(),
-                                        gps.getLongitude().toString(),
-                                        receive,
-                                        tipo
-                                    )
-                                }
+                    suministroViewModel.generarArchivo(
+                        nameImg,
+                        this@PhotoActivity,
+                        data,
+                        fechaAsignacion,
+                        direccion,
+                        "",
+                        gps.getLatitude().toString(),
+                        gps.getLongitude().toString(),
+                        receive,
+                        tipo
+                    )
 
-                                override fun onError(e: Throwable) {}
-                                override fun onComplete() {}
-                            })
-                    } catch (e: IOException) {
-                        suministroViewModel.setError(e.toString())
-                    }
+
+//                    try {
+//                        val addressObservable = Observable.just(
+//                            Geocoder(this)
+//                                .getFromLocation(
+//                                    gps.getLatitude(), gps.getLongitude(), 1
+//                                )[0]
+//                        )
+//                        addressObservable.subscribeOn(Schedulers.io())
+//                            .observeOn(AndroidSchedulers.mainThread())
+//                            .subscribe(object : Observer<Address> {
+//                                override fun onSubscribe(d: Disposable) {}
+//                                override fun onNext(address: Address) {
+//
+//                                }
+//
+//                                override fun onError(e: Throwable) {}
+//                                override fun onComplete() {}
+//                            })
+//                    } catch (e: IOException) {
+//                        suministroViewModel.setError(e.toString())
+//                    }
                 } else {
                     gps.showSettingsAlert(this)
                 }
-            }
+
         }
     }
 
@@ -387,7 +391,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 if (parentId == 92) {
                     if (online == 1) {
                         load()
-                        suministroViewModel.verificateCorte(suministro, receive, this)
+                        suministroViewModel.sendFiles(receive, this)
                     } else {
                         suministroViewModel.updateRegistro(receive, tipo, 1)
                     }

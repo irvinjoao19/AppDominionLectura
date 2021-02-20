@@ -17,6 +17,9 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import com.dsige.lectura.dominion.R
+import com.dsige.lectura.dominion.data.local.model.SuministroCortes
+import com.dsige.lectura.dominion.data.local.model.SuministroLectura
+import com.dsige.lectura.dominion.data.local.model.SuministroReconexion
 import com.dsige.lectura.dominion.data.viewModel.SuministroViewModel
 import com.dsige.lectura.dominion.data.viewModel.ViewModelFactory
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -61,7 +64,14 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
         mMap = p
         zoomToLocation("-12.036175", "-76.999561")
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             return
         }
         mMap.isMyLocationEnabled = true
@@ -69,57 +79,80 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
 
         when (estado) {
             2 -> {
-//                val suministroRelectura: RealmResults<SuministroLectura> = suministroImp.getSuministroLectura(2, 1, 0)
-//                mMap.clear()
-//                for (s: SuministroLectura in suministroRelectura) {
-//                    if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-//                        mMap.addMarker(MarkerOptions()
-//                            .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-//                            .title(s.iD_Suministro.toString())
-//                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)))
-//                    }
-//                }
+                suministroViewModel.getSuministroLectura(estado, 1, 0).observe(this) {
+                    mMap.clear()
+                    for (s: SuministroLectura in it) {
+                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
+                                    .title(s.iD_Suministro.toString())
+                                    .icon(
+                                        BitmapDescriptorFactory.defaultMarker(
+                                            BitmapDescriptorFactory.HUE_RED
+                                        )
+                                    )
+                            )
+                        }
+                    }
+                }
             }
             3 -> {
-//                val suministroCortes: RealmResults<SuministroCortes> = suministroImp.getSuministroCortes(3, 1)
-//                mMap.clear()
-//                for (s: SuministroCortes in suministroCortes) {
-//                    if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-//                        mMap.addMarker(MarkerOptions()
-//                            .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-//                            .title(s.iD_Suministro.toString())
-//                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)))
-//                    }
-//                }
+                suministroViewModel.getSuministroCortes(estado, 1).observe(this) {
+                    mMap.clear()
+                    for (s: SuministroCortes in it) {
+                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
+                                    .title(s.iD_Suministro.toString())
+                                    .icon(
+                                        BitmapDescriptorFactory.defaultMarker(
+                                            BitmapDescriptorFactory.HUE_RED
+                                        )
+                                    )
+                            )
+                        }
+                    }
+                }
             }
             4 -> {
-//                val suministrosReconexion: RealmResults<SuministroReconexion> = suministroImp.getSuministroReconexion(4, 1)
-//                mMap.clear()
-//
-//                for (s: SuministroReconexion in suministrosReconexion) {
-//                    if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-//                        mMap.addMarker(MarkerOptions()
-//                            .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-//                            .title(s.iD_Suministro.toString())
-//                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-//                        // BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
-////                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location)))
-//                    }
-//                }
+                suministroViewModel.getSuministroReconexion(estado, 1).observe(this) {
+                    mMap.clear()
+                    for (s: SuministroReconexion in it) {
+                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
+                                    .title(s.iD_Suministro.toString())
+                                    .icon(
+                                        BitmapDescriptorFactory.defaultMarker(
+                                            BitmapDescriptorFactory.HUE_BLUE
+                                        )
+                                    )
+                            )
+                        }
+                    }
+                }
             }
             9 -> {
-//                val reclamos: RealmResults<SuministroLectura> = suministroImp.getSuministroReclamos(estado.toString(), 1)
-//                mMap.clear()
-//                for (s: SuministroLectura in reclamos) {
-//                    if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-//                        mMap.addMarker(MarkerOptions()
-//                            .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-//                            .title(s.iD_Suministro.toString())
-//                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-//                        // BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
-////                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location)))
-//                    }
-//                }
+                suministroViewModel.getSuministroReclamos(estado.toString(), 1).observe(this) {
+                    mMap.clear()
+                    for (s: SuministroLectura in it) {
+                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
+                                    .title(s.iD_Suministro.toString())
+                                    .icon(
+                                        BitmapDescriptorFactory.defaultMarker(
+                                            BitmapDescriptorFactory.HUE_BLUE
+                                        )
+                                    )
+                            )
+                        }
+                    }
+                }
             }
         }
         mMap.setOnMarkerClickListener(this)
@@ -178,8 +211,10 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
 
 
     private fun dialogResumen(t: String) {
-        val builder = android.app.AlertDialog.Builder(ContextThemeWrapper(this, R.style.AppTheme))
-        @SuppressLint("InflateParams") val v = LayoutInflater.from(this).inflate(R.layout.cardview_resumen_maps, null)
+        val builder =
+            android.app.AlertDialog.Builder(ContextThemeWrapper(this, R.style.AppTheme))
+        @SuppressLint("InflateParams") val v =
+            LayoutInflater.from(this).inflate(R.layout.cardview_resumen_maps, null)
 
         val buttonSalir = v.findViewById<Button>(R.id.buttonSalir)
         val textViewTitle = v.findViewById<TextView>(R.id.textViewTitle)
@@ -188,34 +223,36 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
         val textViewDireccion = v.findViewById<TextView>(R.id.textViewDireccion)
 
         when (estado) {
-//            2, 9 -> {
-//                val s: SuministroLectura = suministroImp.suministroLecturaById(t.toInt())
-//                textViewTitle.text = String.format("Orden : %s", s.orden)
-//                textViewMedidor.text = String.format("Medidor :%s", s.suministro_Medidor)
-//                textViewContrato.text = String.format("Contrato :%s", s.suministro_Numero)
-//                textViewDireccion.text = s.suministro_Direccion
-//            }
-//            3 -> {
-//                val s: SuministroCortes = suministroImp.suministroCortesById(t.toInt())
-//                textViewTitle.text = String.format("Orden : %s", s.orden)
-//                textViewMedidor.text = String.format("Medidor :%s", s.suministro_Medidor)
-//                textViewContrato.text = String.format("Contrato :%s", s.suministro_Numero)
-//                textViewDireccion.text = s.suministro_Direccion
-//            }
-//            4 -> {
-//                val s: SuministroReconexion = suministroImp.suministroReconexionById(t.toInt())
-//                textViewTitle.text = String.format("Orden : %s", s.orden)
-//                textViewMedidor.text = String.format("Medidor :%s", s.suministro_Medidor)
-//                textViewContrato.text = String.format("Contrato :%s", s.suministro_Numero)
-//                textViewDireccion.text = s.suministro_Direccion
-//            }
-//            else -> {
-//                val s: SuministroReparto = suministroImp.suministroRepartoById(t.toInt())
-//                textViewTitle.text = String.format("Orden : %s", s.Cod_Orden_Reparto)
-//                textViewMedidor.text = String.format("Medidor :%s", s.Suministro_Medidor_reparto)
-//                textViewContrato.text = String.format("Contrato :%s", s.Suministro_Numero_reparto)
-//                textViewDireccion.text = s.Direccion_Reparto
-//            }
+            3 -> {
+                suministroViewModel.getSuministroCorteById(t.toInt()).observe(this) {
+                    if (it != null) {
+                        textViewTitle.text = String.format("Orden : %s", it.orden)
+                        textViewMedidor.text = String.format("Medidor :%s", it.suministro_Medidor)
+                        textViewContrato.text = String.format("Contrato :%s", it.suministro_Numero)
+                        textViewDireccion.text = it.suministro_Direccion
+                    }
+                }
+            }
+            4 -> {
+                suministroViewModel.getSuministroReconexionById(t.toInt()).observe(this) {
+                    if (it != null) {
+                        textViewTitle.text = String.format("Orden : %s", it.orden)
+                        textViewMedidor.text = String.format("Medidor :%s", it.suministro_Medidor)
+                        textViewContrato.text = String.format("Contrato :%s", it.suministro_Numero)
+                        textViewDireccion.text = it.suministro_Direccion
+                    }
+                }
+            }
+            else -> {
+                suministroViewModel.getSuministroLecturaById(t.toInt()).observe(this) {
+                    if (it != null) {
+                        textViewTitle.text = String.format("Orden : %s", it.orden)
+                        textViewMedidor.text = String.format("Medidor :%s", it.suministro_Medidor)
+                        textViewContrato.text = String.format("Contrato :%s", it.suministro_Numero)
+                        textViewDireccion.text = it.suministro_Direccion
+                    }
+                }
+            }
         }
 
         builder.setView(v)

@@ -71,8 +71,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var ordenOperario: Int = 0
     private var titulo: String = ""
     private var estado: Int = 0
-
-    private var tipo: Int = 0
     private var online: Int = 0
     private var operarioId: Int = 0
     private var tipoCliente: Int = 0
@@ -138,7 +136,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
         suministroViewModel.user.observe(this) {
             online = it.operario_EnvioEn_Linea
-            operarioId = it.iD_Operario
+            r.iD_Operario = it.iD_Operario
         }
 
         getLecturaByOrden(orden)
@@ -706,7 +704,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         r.fecha_Sincronizacion_Android = r.registro_Fecha_SQLITE
         r.registro_TieneFoto = tieneFoto
         r.estado = estado
-        r.tipo = if (recuperada == 10) 10 else tipo
+        r.tipo = if (recuperada == 10) 10 else estado
         suministroViewModel.insertRegistro(r)
     }
 
@@ -715,7 +713,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         intent.putExtra("envioId", r.iD_Suministro)
         intent.putExtra("orden", orden)
         intent.putExtra("orden_2", ordenOperario)
-        intent.putExtra("tipo", if (estado == 10) 10 else tipo)
+        intent.putExtra("tipo", if (estado == 10) 10 else estado)
         intent.putExtra("estado", estado)
         intent.putExtra("nombre", titulo)
         intent.putExtra("suministro", contrato.trim())

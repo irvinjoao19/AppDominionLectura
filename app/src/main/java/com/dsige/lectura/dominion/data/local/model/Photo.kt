@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 open class Photo {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var iD_Foto: Int = 0
     var conformidad: Int =
         0 // TODO se usara para mostrar la foto de acta de conformidad 0 = normal , 1 = acta , 2 = firma

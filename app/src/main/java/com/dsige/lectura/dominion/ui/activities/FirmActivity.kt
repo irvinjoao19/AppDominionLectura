@@ -54,6 +54,7 @@ class FirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_firm)
+        p = Photo()
         val b = intent.extras
         if (b != null) {
             receive = b.getInt("envioId")
@@ -85,9 +86,10 @@ class FirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
         suministroViewModel.mensajeSuccess.observe(this) {
             Util.toastMensaje(this, it)
+            finish()
         }
         suministroViewModel.mensajeError.observe(this) {
-            finish()
+            Util.toastMensaje(this, it)
         }
 
         fabFirma.setOnClickListener(this)

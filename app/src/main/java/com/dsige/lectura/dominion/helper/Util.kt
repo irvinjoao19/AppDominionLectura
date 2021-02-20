@@ -169,7 +169,7 @@ object Util {
         val date = Date()
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
         FechaActual = format.format(date)
-        return id + "_" + tipo + "_" + FechaActual
+        return id + "_" + tipo + "_" + FechaActual + ".jpg"
     }
 
 
@@ -927,13 +927,13 @@ object Util {
 
             val out = FileOutputStream(imagePath)
             if (imageType.equals("png", ignoreCase = true)) {
-                b!!.compress(Bitmap.CompressFormat.PNG, 100, out)
+                b!!.compress(Bitmap.CompressFormat.PNG, 70, out)
             } else if (imageType.equals("jpeg", ignoreCase = true) || imageType.equals(
                     "jpg",
                     ignoreCase = true
                 )
             ) {
-                b!!.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                b!!.compress(Bitmap.CompressFormat.JPEG, 70, out)
             }
             fOut.flush()
             fOut.close()
@@ -1074,7 +1074,7 @@ object Util {
 
     fun getPhotoAdjunto(
         nameImg: String, context: Context,
-        data: Intent, fechaAsignacion: String, direccion: String, distrito: String,
+        data: Intent?, fechaAsignacion: String, direccion: String, distrito: String,
         latitud: String,
         longitud: String,
         receive: Int,
@@ -1082,21 +1082,23 @@ object Util {
     ): Observable<Photo> {
         return Observable.create {
             val f = File(getFolder(context), nameImg)
-            if (!f.exists()) {
-                try {
-                    val input =
-                        context.contentResolver.openInputStream(data.data!!) as FileInputStream
-                    val out = FileOutputStream(f)
-                    val inChannel = input.channel
-                    val outChannel = out.channel
-                    inChannel.transferTo(0, inChannel.size(), outChannel)
-                    input.close()
-                    out.close()
-                    getAngleImage(context, f.absolutePath, fechaAsignacion, direccion, distrito)
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
+//            if (!f.exists()) {
+//                try {
+//                    val input =
+//                        context.contentResolver.openInputStream(data.data!!) as FileInputStream
+//                    val out = FileOutputStream(f)
+//                    val inChannel = input.channel
+//                    val outChannel = out.channel
+//                    inChannel.transferTo(0, inChannel.size(), outChannel)
+//                    input.close()
+//                    out.close()
+//                    getAngleImage(context, f.absolutePath, fechaAsignacion, direccion, distrito)
+//                } catch (e: IOException) {
+//                    e.printStackTrace()
+//                }
+//            }
+
+            getAngleImage(context, f.absolutePath, fechaAsignacion, direccion, distrito)
 
             val photo = Photo()
             photo.iD_Suministro = receive

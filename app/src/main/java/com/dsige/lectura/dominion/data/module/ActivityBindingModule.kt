@@ -33,6 +33,9 @@ abstract class ActivityBindingModule {
     internal abstract fun bindFormReconexionActity(): FormReconexionActivity
 
     @ContributesAndroidInjector
+    internal abstract fun bindReconexionFirmActivity(): ReconexionFirmActivity
+
+    @ContributesAndroidInjector
     internal abstract fun bindFirmActivity(): FirmActivity
 
     @ContributesAndroidInjector

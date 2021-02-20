@@ -55,4 +55,7 @@ interface ReconexionDao {
 
     @Query("SELECT * FROM SuministroReconexion WHERE orden=:orden")
     fun suministroReconexionByOrden(orden: Int): SuministroReconexion
+
+    @Query("SELECT * FROM SuministroReconexion WHERE iD_Suministro =:id")
+    fun getSuministroReconexionById(id: Int): LiveData<SuministroReconexion>
 }
