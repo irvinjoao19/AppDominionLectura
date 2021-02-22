@@ -19,9 +19,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import com.dsige.lectura.dominion.BuildConfig
 import com.dsige.lectura.dominion.R
 import com.dsige.lectura.dominion.data.local.model.Photo
 import com.dsige.lectura.dominion.data.local.model.SuministroLectura
@@ -243,7 +245,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (tipo != 3){
+            if (tipo != 3) {
                 when (tipo) {
                     4 -> goBackActivity(FormReconexionActivity::class.java)
                     else -> goBackActivity(FormLecturaActivity::class.java)
@@ -310,74 +312,54 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun goCamera() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (takePictureIntent.resolveActivity(this.packageManager) != null) {
-            nameImg = Util.getFechaSuministro(
-                suministro.toInt(),
-                if (tipo == 2 || tipo == 9) 10 else tipo,
-                fechaAsignacion
-            )
-            val file = File(Util.getFolder(this), nameImg)
-            val uriSavedImage = Uri.fromFile(file)
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage)
+        nameImg = Util.getFechaSuministro(
+            suministro.toInt(),
+            if (tipo == 2 || tipo == 9) 10 else tipo,
+            fechaAsignacion
+        )
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                val photoFile: File? = try {
+                    Util.createImageFile(nameImg,this)
+                } catch (ex: IOException) {
+                    null
+                }
+                photoFile?.also {
+                    val uriSavedImage = Uri.fromFile(it)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage)
 
-            if (Build.VERSION.SDK_INT >= 24) {
-                try {
-                    val m = StrictMode::class.java.getMethod("disableDeathOnFileUriExposure")
-                    m.invoke(null)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        try {
+                            val m = StrictMode::class.java.getMethod("disableDeathOnFileUriExposure")
+                            m.invoke(null)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    startActivityForResult(takePictureIntent, Permission.CAMERA_REQUEST)
                 }
             }
-            startActivityForResult(takePictureIntent, Permission.CAMERA_REQUEST)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == Permission.CAMERA_REQUEST && resultCode == RESULT_OK) {
-
-                val gps = Gps(this)
-                if (gps.isLocationEnabled()) {
-                    suministroViewModel.generarArchivo(
-                        nameImg,
-                        this@PhotoActivity,
-                        data,
-                        fechaAsignacion,
-                        direccion,
-                        "",
-                        gps.getLatitude().toString(),
-                        gps.getLongitude().toString(),
-                        receive,
-                        tipo
-                    )
-
-
-//                    try {
-//                        val addressObservable = Observable.just(
-//                            Geocoder(this)
-//                                .getFromLocation(
-//                                    gps.getLatitude(), gps.getLongitude(), 1
-//                                )[0]
-//                        )
-//                        addressObservable.subscribeOn(Schedulers.io())
-//                            .observeOn(AndroidSchedulers.mainThread())
-//                            .subscribe(object : Observer<Address> {
-//                                override fun onSubscribe(d: Disposable) {}
-//                                override fun onNext(address: Address) {
-//
-//                                }
-//
-//                                override fun onError(e: Throwable) {}
-//                                override fun onComplete() {}
-//                            })
-//                    } catch (e: IOException) {
-//                        suministroViewModel.setError(e.toString())
-//                    }
-                } else {
-                    gps.showSettingsAlert(this)
-                }
-
+            val gps = Gps(this)
+            if (gps.isLocationEnabled()) {
+                suministroViewModel.generarArchivo(
+                    nameImg,
+                    this@PhotoActivity,
+                    fechaAsignacion,
+                    direccion,
+                    gps.getLatitude().toString(),
+                    gps.getLongitude().toString(),
+                    receive,
+                    tipo
+                )
+            } else {
+                gps.showSettingsAlert(this)
+            }
         }
     }
 

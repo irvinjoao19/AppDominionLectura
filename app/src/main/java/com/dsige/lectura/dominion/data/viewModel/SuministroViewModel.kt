@@ -200,18 +200,16 @@ internal constructor(private val roomRepository: AppRepository, private val retr
     fun generarArchivo(
         nameImg: String,
         context: Context,
-        data: Intent?,
         fechaAsignacion: String,
         direccion: String,
-        distrito: String,
         latitud: String,
         longitud: String,
         receive: Int,
         tipo: Int
     ) {
         Util.getPhotoAdjunto(
-            nameImg, context, data, fechaAsignacion, direccion,
-            distrito, latitud, longitud, receive, tipo
+            nameImg, context, fechaAsignacion, direccion,
+            latitud, longitud, receive, tipo
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

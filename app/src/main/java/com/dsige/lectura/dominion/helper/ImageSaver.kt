@@ -34,7 +34,7 @@ internal class ImageSaver(
             output = FileOutputStream(file).apply {
                 write(bytes)
             }
-            Util.getAngleImage(context, file.absolutePath, fechaAsignacion, direccion, distrito)
+            Util.getAngleImage(context, file.absolutePath, fechaAsignacion, direccion)
         } catch (e: IOException) {
             Log.e(TAG, e.toString())
         } finally {

@@ -19,6 +19,8 @@ import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.Html
 import android.text.Spanned
+import android.text.TextPaint
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -309,7 +311,6 @@ object Util {
 
     }
 
-
     private fun shrinkBitmap(file: String): Bitmap {
         val options = BitmapFactory.Options()
         options.inSampleSize = 4
@@ -325,7 +326,6 @@ object Util {
                 options.inSampleSize = widthRatio
             }
         }
-
         options.inJustDecodeBounds = false
         return BitmapFactory.decodeFile(file, options)
     }
@@ -867,8 +867,7 @@ object Util {
         context: Context,
         photoPath: String,
         fecha: String,
-        direccion: String,
-        distrito: String
+        direccion: String
     ): String {
         try {
             val ei = ExifInterface(photoPath)
@@ -884,7 +883,7 @@ object Util {
                 ExifInterface.ORIENTATION_UNDEFINED -> 0
                 else -> 90
             }
-            return rotateNewImage(context, degree, photoPath, fecha, direccion, distrito)
+            return rotateNewImage(context, degree, photoPath, fecha, direccion)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -898,46 +897,30 @@ object Util {
         degree: Int,
         imagePath: String,
         fecha: String,
-        direccion: String,
-        distrito: String
+        direccion: String
     ): String {
         try {
-            var b: Bitmap? = BitmapFactory.decodeFile(imagePath)
+            var b: Bitmap = shrinkBitmap(imagePath)
             val matrix = Matrix()
-            if (b!!.width > b.height) {
-                matrix.setRotate(degree.toFloat())
-//                b = Bitmap.createBitmap(b, 0, 0, 480, 640, matrix, true)
-                b = Bitmap.createBitmap(b, 0, 0, b.width, b.height, matrix, true)
-                val text = String.format(
-                    "%s\n%s\n%s",
-                    if (fecha.isEmpty()) getDateTimeFormatString(Date(File(imagePath).lastModified())) else String.format(
-                        "%s %s",
-                        fecha,
-                        getHoraActual()
-                    ),
-                    direccion,
-                    distrito
-                )
-                b = drawTextToBitmap(context, b, text)
-            }
+            matrix.setRotate(degree.toFloat())
+            b = Bitmap.createBitmap(b, 0, 0, b.width, b.height, matrix, true)
+
+            val text = String.format(
+                "%s\n%s",
+                if (fecha.isEmpty()) getDateTimeFormatString(Date(File(imagePath).lastModified())) else String.format(
+                    "%s %s",
+                    fecha,
+                    getHoraActual()
+                ),
+                direccion
+            )
+            b = drawTextToBitmap(context, b, text)
 
             val fOut = FileOutputStream(imagePath)
-            val imageName = imagePath.substring(imagePath.lastIndexOf("/") + 1)
-            val imageType = imageName.substring(imageName.lastIndexOf(".") + 1)
-
-            val out = FileOutputStream(imagePath)
-            if (imageType.equals("png", ignoreCase = true)) {
-                b!!.compress(Bitmap.CompressFormat.PNG, 70, out)
-            } else if (imageType.equals("jpeg", ignoreCase = true) || imageType.equals(
-                    "jpg",
-                    ignoreCase = true
-                )
-            ) {
-                b!!.compress(Bitmap.CompressFormat.JPEG, 70, out)
-            }
+            b.compress(Bitmap.CompressFormat.JPEG, 70, fOut)
             fOut.flush()
             fOut.close()
-            b!!.recycle()
+            b.recycle()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -945,11 +928,12 @@ object Util {
         return imagePath
     }
 
+
     private fun drawTextToBitmap(
         gContext: Context,
         b: Bitmap,
         gText: String
-    ): Bitmap? {
+    ): Bitmap {
         var bitmap = b
         var bitmapConfig = bitmap.config
 
@@ -966,7 +950,7 @@ object Util {
         // text color - #3D3D3D
         paint.color = Color.WHITE
         // text size in pixels
-        paint.textSize = 18f
+        paint.textSize = 19f
         // text shadow
         paint.setShadowLayer(1f, 0f, 1f, Color.WHITE)
 
@@ -981,13 +965,17 @@ object Util {
         var y: Float = (bitmap.height - bounds.height() * noOfLines).toFloat()
         val mPaint = Paint()
         mPaint.color = ContextCompat.getColor(gContext, R.color.transparentBlack)
+        mPaint.strokeWidth = 10f
         val left = 0
         val top = bitmap.height - bounds.height() * (noOfLines + 1)
         val right = bitmap.width
         val bottom = bitmap.height
         canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), mPaint)
         for (line in gText.split("\n").toTypedArray()) {
-            canvas.drawText(line, x.toFloat(), y, paint)
+            val textPaint = TextPaint()
+            val txt =
+                TextUtils.ellipsize(line, textPaint, (y * 0.45).toFloat(), TextUtils.TruncateAt.END)
+            canvas.drawText(txt.toString(), x.toFloat(), y, paint)
             y += paint.descent() - paint.ascent()
         }
         return bitmap
@@ -1073,36 +1061,18 @@ object Util {
     }
 
     fun getPhotoAdjunto(
-        nameImg: String, context: Context,
-        data: Intent?, fechaAsignacion: String, direccion: String, distrito: String,
-        latitud: String,
-        longitud: String,
-        receive: Int,
-        tipo: Int
+        nameImg: String, context: Context, fechaAsignacion: String, direccion: String,
+        latitud: String, longitud: String, receive: Int, tipo: Int
     ): Observable<Photo> {
         return Observable.create {
-            val f = File(getFolder(context), nameImg)
-//            if (!f.exists()) {
-//                try {
-//                    val input =
-//                        context.contentResolver.openInputStream(data.data!!) as FileInputStream
-//                    val out = FileOutputStream(f)
-//                    val inChannel = input.channel
-//                    val outChannel = out.channel
-//                    inChannel.transferTo(0, inChannel.size(), outChannel)
-//                    input.close()
-//                    out.close()
-//                    getAngleImage(context, f.absolutePath, fechaAsignacion, direccion, distrito)
-//                } catch (e: IOException) {
-//                    e.printStackTrace()
-//                }
-//            }
 
-            getAngleImage(context, f.absolutePath, fechaAsignacion, direccion, distrito)
-
+            val f = File(getFolder(context), "$nameImg.jpg")
+            if (f.exists()) {
+                getAngleImage(context, f.absolutePath, fechaAsignacion, direccion)
+            }
             val photo = Photo()
             photo.iD_Suministro = receive
-            photo.rutaFoto = nameImg
+            photo.rutaFoto = "$nameImg.jpg"
             photo.fecha_Sincronizacion_Android = getFechaActual()
             photo.tipo = tipo
             photo.estado = 1
@@ -1169,7 +1139,11 @@ object Util {
                 .build()
         WorkManager
             .getInstance(context)
-            .enqueueUniquePeriodicWork("Gps-Work", ExistingPeriodicWorkPolicy.REPLACE, locationWorker)
+            .enqueueUniquePeriodicWork(
+                "Gps-Work",
+                ExistingPeriodicWorkPolicy.REPLACE,
+                locationWorker
+            )
         toastMensaje(context, "Servicio Gps Activado")
     }
 
@@ -1191,9 +1165,25 @@ object Util {
         }
         FechaActual = format.format(date)
         return when (tipo) {
-            1, 10 -> String.format("%s_%s_%s%s.jpg", id, tipo, fecha.replace("/", ""), FechaActual)
-            else -> String.format("%s_%s_%s.jpg", id, tipo, FechaActual)
+            1, 10 -> String.format("%s_%s_%s%s", id, tipo, fecha.replace("/", ""), FechaActual)
+            else -> String.format("%s_%s_%s", id, tipo, FechaActual)
         }
+    }
+
+    @Throws(IOException::class)
+    fun createImageFile(name: String, context: Context): File {
+
+        return File(getFolder(context), "$name.jpg").apply {
+            absolutePath
+        }
+//        return File.createTempFile(
+//            name, /* prefix */
+//            ".jpg", /* suffix */
+//            getFolder(context) /* directory */
+//        ).apply {
+//            // Save a file: path for use with ACTION_VIEW intents
+//            absolutePath
+//        }
     }
 
 }

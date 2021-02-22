@@ -122,6 +122,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         supportActionBar!!.title = titulo
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
+            Util.hideKeyboard(this)
             finish()
         }
 
@@ -200,6 +201,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 val motivoAdapter = MotivoAdapter(object : OnItemClickListener.MotivoListener {
                     override fun onItemClick(m: Motivo, view: View, position: Int) {
                         r.motivoId = m.codigo
+                        r.motivoNombre = m.descripcion
                         editTextMotivo.setText(m.descripcion)
                         dialog.dismiss()
                     }
