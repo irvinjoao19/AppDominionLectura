@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1093253019757",
+    "project_id": "appdominionlectura",
+    "storage_bucket": "appdominionlectura.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1093253019757:android:b617104c08ba6b82fb6764",
+        "android_client_info": {
+          "package_name": "com.dsige.lectura.dominion"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1093253019757-ko0gus71cd04v8kq7nbudq2altte64fi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dsige.lectura.dominion",
+            "certificate_hash": "048636545d0acf24b76c3fd4e9f46eccc3b0a915"
+          }
+        },
+        {
+          "client_id": "1093253019757-0c44607o4f0odgujmgf6k4kvf746cq3r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4YHK0wTMIFjaVvfYtSpHo51WH9N4GKEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1093253019757-0c44607o4f0odgujmgf6k4kvf746cq3r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

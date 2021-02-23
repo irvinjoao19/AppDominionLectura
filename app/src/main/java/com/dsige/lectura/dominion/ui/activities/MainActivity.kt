@@ -1,14 +1,25 @@
 package com.dsige.lectura.dominion.ui.activities
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -18,13 +29,25 @@ import com.dsige.lectura.dominion.helper.Util
 import com.dsige.lectura.dominion.ui.fragments.MainFragment
 import com.dsige.lectura.dominion.data.viewModel.UsuarioViewModel
 import com.dsige.lectura.dominion.data.viewModel.ViewModelFactory
+import com.dsige.lectura.dominion.helper.Permission
 import com.dsige.lectura.dominion.ui.fragments.SendFragment
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
+
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.ktx.get
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+
+
+
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
+import java.io.File
 import javax.inject.Inject
 
 class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -32,10 +55,15 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
     lateinit var usuarioViewModel: UsuarioViewModel
+    private lateinit var remoteConfig: FirebaseRemoteConfig
+
+
     lateinit var builder: AlertDialog.Builder
     private var dialog: AlertDialog? = null
     private var usuarioId: Int = 0
     private var logout: String = "off"
+    private var link: String = ""
+    private var name: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +90,7 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
                 navigationView.setNavigationItemSelectedListener(this@MainActivity)
                 fragmentByDefault(MainFragment.newInstance(usuarioId))
                 message()
+                remoteConfig()
             } else {
                 goLogin()
             }
@@ -201,5 +230,105 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
                 dialog.cancel()
             }
         dialog.show()
+    }
+
+    private fun remoteConfig() {
+
+        remoteConfig = Firebase.remoteConfig
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 3600
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings)
+//        remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
+        remoteConfig.fetch()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    remoteConfig.activate()
+                    val isUpdate = remoteConfig.getBoolean(Util.KEY_UPDATE_ENABLE)
+                    if (isUpdate) {
+                        val version = remoteConfig.getString(Util.KEY_UPDATE_VERSION)
+                        val appVersion = Util.getVersion(this)
+                        val url = remoteConfig.getString(Util.KEY_UPDATE_URL)
+                        val name = remoteConfig.getString(Util.KEY_UPDATE_NAME)
+
+                        if (version != appVersion) {
+                            updateAndroid(url, name, version)
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun updateAndroid(url: String, nombre: String, title: String) {
+        val builderUpdate =
+            AlertDialog.Builder(ContextThemeWrapper(this@MainActivity, R.style.AppTheme))
+        @SuppressLint("InflateParams") val view =
+            LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_new_version, null)
+        val textViewTile = view.findViewById<TextView>(R.id.textViewTitle)
+        val buttonUpdate = view.findViewById<MaterialButton>(R.id.buttonUpdate)
+        builderUpdate.setView(view)
+        val dialogUpdate = builderUpdate.create()
+        dialogUpdate.setCanceledOnTouchOutside(false)
+        dialogUpdate.setCancelable(false)
+        dialogUpdate.show()
+        textViewTile.text = String.format("%s %s", "Nueva Versión", title)
+        buttonUpdate.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                download(url.trim { it <= ' ' }, nombre)
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    Permission.WRITE_REQUEST
+                )
+            }
+            dialogUpdate.dismiss()
+        }
+        link = url.trim { it <= ' ' }
+        name = nombre
+    }
+
+    private fun download(url: String, name: String) {
+        val file = File(Environment.DIRECTORY_DOWNLOADS, name)
+        if (file.exists()) {
+            if (file.delete()) {
+                Log.i("TAG", "deleted")
+            }
+        }
+        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        Log.i("TAG", url)
+        val mUri = Uri.parse(url)
+        val r = DownloadManager.Request(mUri)
+        r.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+        r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        //r.setAllowedOverRoaming(false);
+        //r.setVisibleInDownloadsUi(false)
+        r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
+        r.setTitle(name)
+        r.setMimeType("application/vnd.android.package-archive")
+//        if (Build.VERSION.SDK_INT <= 25) {
+//            val downloadId = dm.enqueue(r)
+//            val onComplete = object : BroadcastReceiver() {
+//                override fun onReceive(ctxt: Context, intent: Intent) {
+//                    val uri = Uri.fromFile(File(Environment.getExternalStorageDirectory() , name))
+//                    val install = Intent(Intent.ACTION_VIEW)
+//                    install.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                    install.setDataAndType(uri, dm.getMimeTypeForDownloadedFile(downloadId))
+//                    startActivity(install)
+//                    unregisterReceiver(this)
+//                    finish()
+//                }
+//            }
+//            registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+//            Util.toastMensaje(this, getString(R.string.wait_download))
+//        } else {
+        dm.enqueue(r)
+        usuarioViewModel.setError(getString(R.string.wait_download))
+
+//        }
     }
 }

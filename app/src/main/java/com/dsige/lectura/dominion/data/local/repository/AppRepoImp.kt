@@ -533,7 +533,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
                         .updateActivoSuministroLectura(id, 0)
                 }
             }
-            dataBase.registroDao().updateRegistroActive(id, tipo, estado)
+            dataBase.registroDao().updateRegistroActive(id, estado)
         }
     }
 
@@ -612,7 +612,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
                     .updateActivoSuministroLectura(t.codigo, 0)
             }
             dataBase.photoDao().updateEnablePhotos(t.codigo)
-            dataBase.registroDao().updateRegistroActive(t.codigo, t.codigoRetorno, 0)
+            dataBase.registroDao().updateRegistroActive(t.codigo, 0)
         }
     }
 

@@ -40,6 +40,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
             R.id.editTextArtefacto -> dialogSpinner(3)
             R.id.editTextResultado -> dialogSpinner(4)
             R.id.editTextUbicacion -> dialogSpinner(5)
+            R.id.editTextCausa -> dialogSpinner(6)
         }
     }
 

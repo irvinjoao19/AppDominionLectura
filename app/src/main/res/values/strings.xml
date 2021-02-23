@@ -154,10 +154,10 @@
     <string name="otros_puerta">Otros Puerta</string>
     <string name="otros_color_puerta">Otros Color Puerta</string>
     <string name="causa">Causa</string>
-    <string name="description_version">AppVeritas requiere de una nueva actualización</string>
+    <string name="description_version">AppDominionLectura requiere de una nueva actualización</string>
     <string name="actualizar">Actualizar</string>
     <string name="content_permission">Debes de aceptar los permisos para poder acceder al aplicativo</string>
-    <string name="wait_download">Espere mientras termina la descargar !</string>
+    <string name="wait_download">Espere mientras termina la descarga !</string>
     <string name="verificar_ficha">Verificar Ficha</string>
     <string name="codigo_emr">Codigo EMR:</string>
     <string name="enviar_ficha">Enviar Ficha</string>

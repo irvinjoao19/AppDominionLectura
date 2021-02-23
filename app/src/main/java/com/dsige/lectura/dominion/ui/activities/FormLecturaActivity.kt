@@ -701,11 +701,11 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun saveRegistro(tieneFoto: String, estado: Int) {
+    private fun saveRegistro(tieneFoto: String, e: Int) {
         r.registro_Fecha_SQLITE = Util.getFechaActual()
         r.fecha_Sincronizacion_Android = r.registro_Fecha_SQLITE
         r.registro_TieneFoto = tieneFoto
-        r.estado = estado
+        r.estado = e
         r.tipo = if (recuperada == 10) 10 else estado
         suministroViewModel.insertRegistro(r)
     }

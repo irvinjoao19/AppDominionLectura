@@ -59,6 +59,11 @@ import kotlin.math.*
 
 object Util {
 
+    var KEY_UPDATE_ENABLE = "isUpdate"
+    val KEY_UPDATE_VERSION = "version"
+    val KEY_UPDATE_URL = "url"
+    val KEY_UPDATE_NAME = "name"
+
     val locale = Locale("es", "ES")
 
     private var FechaActual: String? = ""

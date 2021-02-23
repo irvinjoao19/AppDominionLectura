@@ -22,9 +22,8 @@ object Permission {
     val REGISTRO_REQUEST = 4
     val UPDATE_REGISTRO_REQUEST = 5
     val CANCEL_REGISTOR_REQUEST = 6
-
     val POLICY_REQUEST = 7
-
+    var WRITE_REQUEST = 9
 
     fun hasPermissions(context: Context?, vararg permissions: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null) {

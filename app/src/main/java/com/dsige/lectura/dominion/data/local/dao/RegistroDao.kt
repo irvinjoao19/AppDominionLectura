@@ -40,9 +40,8 @@ interface RegistroDao {
     @Query("SELECT * FROM Registro WHERE iD_Suministro=:id ")
     fun getRegistroBySuministro(id: Int): LiveData<Registro>
 
-    @Query("UPDATE Registro  SET estado = :e WHERE iD_Suministro=:id AND tipo=:t")
-    fun updateRegistroActive(id: Int, t: Int,e:Int)
-
+    @Query("UPDATE Registro  SET estado = :e WHERE iD_Suministro=:id")
+    fun updateRegistroActive(id: Int, e: Int)
 
 
 }
