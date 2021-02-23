@@ -183,7 +183,9 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
         }
 
         suministroViewModel.getRegistroBySuministro(id).observe(this) {
-            parentId = it.parentId
+            if (it != null){
+                parentId = it.parentId
+            }
         }
 
         val layoutManager = GridLayoutManager(this, 2)

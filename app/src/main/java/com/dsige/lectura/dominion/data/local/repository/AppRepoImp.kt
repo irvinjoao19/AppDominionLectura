@@ -523,8 +523,6 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
         return Completable.fromAction {
             if (estado != 2) {
                 when (tipo) {
-                    1, 2 -> dataBase.lecturaDao()
-                        .updateActivoSuministroLectura(id, 0)
                     3 -> dataBase.corteDao()
                         .updateActivoSuministroCortes(id, 0)
                     4 -> dataBase.reconexionDao()

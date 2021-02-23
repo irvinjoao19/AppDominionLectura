@@ -395,6 +395,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 r.fecha_Sincronizacion_Android = r.registro_Fecha_SQLITE
                 r.registro_TieneFoto = "1"
                 r.estado = 2
+                r.orden = orden
                 r.tipo = if (recuperada == 10) 10 else estado
                 suministroViewModel.insertRegistro(r)
             }

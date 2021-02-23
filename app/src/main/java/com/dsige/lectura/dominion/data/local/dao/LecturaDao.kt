@@ -22,7 +22,7 @@ interface LecturaDao {
     @Query("SELECT * FROM SuministroLectura WHERE estado= 1 ")
     fun getSuministroLecturaTask(): List<SuministroLectura>
 
-    @Query("SELECT COUNT(*) FROM SuministroLectura WHERE activo = 1")
+    @Query("SELECT COUNT(*) FROM SuministroLectura WHERE estado= 1 AND activo = 1")
     fun getSuministroLecturaSize(): Int
 
     @Query("SELECT COUNT(*) FROM SuministroLectura WHERE estado= 2 AND activo = 1")
@@ -32,7 +32,7 @@ interface LecturaDao {
     fun deleteAll()
 
 
-    @Query("SELECT COUNT(*) FROM SuministroLectura WHERE estado= 1 AND activo = 1 AND flagObservada = 0")
+    @Query("SELECT COUNT(*) FROM SuministroLectura WHERE estado= 1 AND activo = 1 AND flagObservada = 0  AND suministro_TipoProceso = '1' ")
     fun getSuministroLecturaNormalSize(): Int
 
     @Query("SELECT COUNT(*) FROM SuministroLectura WHERE estado= 1 AND activo = 1 AND flagObservada = 1 AND suministro_TipoProceso = '1' ")

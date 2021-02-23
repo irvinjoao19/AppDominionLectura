@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity
 open class Registro {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var id: Int = 0
     var iD_Registro: Int = 0
     var iD_Operario: Int = 0

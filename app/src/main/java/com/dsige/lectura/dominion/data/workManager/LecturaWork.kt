@@ -42,7 +42,7 @@ internal constructor(
         }
     }
 
-    private fun sendFiles(context: Context) {
+   private fun sendFiles(context: Context) {
         val files = roomRepository.getPhotoTaskFiles()
         files.flatMap { observable ->
             Observable.fromIterable(observable).flatMap { a ->
@@ -69,10 +69,13 @@ internal constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<String> {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onNext(t: String) {}
-                override fun onError(t: Throwable) {}
                 override fun onComplete() {
                     sendSuministro()
+                }
+
+                override fun onNext(t: String) {}
+                override fun onError(t: Throwable) {
+                    Log.i("TAG",t.message.toString())
                 }
             })
     }
@@ -93,10 +96,14 @@ internal constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Mensaje> {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onError(t: Throwable) {}
                 override fun onComplete() {}
+
                 override fun onNext(t: Mensaje) {
                     updateEnableRegistro(t)
+                }
+
+                override fun onError(t: Throwable) {
+                    Log.i("TAG",t.message.toString())
                 }
             })
     }

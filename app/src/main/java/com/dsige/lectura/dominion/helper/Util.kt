@@ -1116,10 +1116,10 @@ object Util {
 
     // execute services
     fun executeLecturaWork(context: Context) {
-        val downloadConstraints = Constraints.Builder()
-            .setRequiresCharging(true)
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+//        val downloadConstraints = Constraints.Builder()
+//            .setRequiresCharging(true)
+//            .setRequiredNetworkType(NetworkType.CONNECTED)
+//            .build()
         // Define the input data for work manager
 //        val data = Data.Builder()
 //        data.putInt("tipo", tipo)
@@ -1128,7 +1128,7 @@ object Util {
         val downloadImageWork = OneTimeWorkRequest
             .Builder(LecturaWork::class.java)
 //          .setInputData(data.build())
-            .setConstraints(downloadConstraints)
+//            .setConstraints(downloadConstraints)
             .build()
         WorkManager.getInstance(context).enqueue((downloadImageWork))
     }

@@ -72,7 +72,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var titulo: String = ""
     private var estado: Int = 0
     private var online: Int = 0
-    private var operarioId: Int = 0
     private var tipoCliente: Int = 0
 
     // Se utiliza para Lectura Recuperadas
@@ -94,7 +93,8 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var latitud = ""
     private var longitud = ""
     private var suministro_Numero = ""
-
+    private var tipo: Int = 0
+    private var lecturaManual: Int = 0
 
     lateinit var r: Registro
 
@@ -128,11 +128,15 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
         suministroViewModel.getRegistros().observe(this) {
             if (it != null) {
-                if (it.size == 10) {
+                if (it.size >= 10) {
                     Util.executeLecturaWork(this)
                 }
             }
         }
+
+        tipo = if (estado == 1 || estado == 7 || estado == 6 || estado == 10) 1 else estado
+        recuperada = if (estado == 10) 10 else 0
+        lecturaManual = if (estado == 7) 1 else 0
 
 
         suministroViewModel.user.observe(this) {
@@ -615,6 +619,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 r.registro_Lectura = editTextLectura.text.toString()
                 r.registro_Confirmar_Lectura = editTextLectura.text.toString()
 
+
                 r.registro_Observacion = if (grupoId == 5) {
                     editTextMedidor.text.toString() + "/" + editTextLectura2.text.toString()
                 } else {
@@ -706,7 +711,9 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         r.fecha_Sincronizacion_Android = r.registro_Fecha_SQLITE
         r.registro_TieneFoto = tieneFoto
         r.estado = e
-        r.tipo = if (recuperada == 10) 10 else estado
+        r.lecturaManual = lecturaManual
+        r.orden = orden
+        r.tipo = if (recuperada == 10) 10 else tipo
         suministroViewModel.insertRegistro(r)
     }
 
@@ -715,7 +722,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         intent.putExtra("envioId", r.iD_Suministro)
         intent.putExtra("orden", orden)
         intent.putExtra("orden_2", ordenOperario)
-        intent.putExtra("tipo", if (estado == 10) 10 else estado)
+        intent.putExtra("tipo", if (estado == 10) 10 else tipo)
         intent.putExtra("estado", estado)
         intent.putExtra("nombre", titulo)
         intent.putExtra("suministro", contrato.trim())
