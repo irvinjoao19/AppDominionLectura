@@ -41,6 +41,22 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
             R.id.editTextResultado -> dialogSpinner(4)
             R.id.editTextUbicacion -> dialogSpinner(5)
             R.id.editTextCausa -> dialogSpinner(6)
+            R.id.imageViewMap -> {
+                if (latitud.isNotEmpty() || longitud.isNotEmpty()) {
+                    Util.hideKeyboard(this)
+                    startActivity(
+                        Intent(this@FormCorteActivity, MapsActivity::class.java)
+                            .putExtra("latitud", latitud)
+                            .putExtra("longitud", longitud)
+                            .putExtra("title", suministro_Numero)
+                    )
+                } else {
+                    Util.toastMensaje(
+                        this@FormCorteActivity,
+                        "Este suministro no cuenta con coordenadas"
+                    )
+                }
+            }
         }
     }
 
@@ -324,7 +340,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun getComboObservacion() {
-        suministroViewModel.getDetalleGrupoByMotivoTask(estado,"1")
+        suministroViewModel.getDetalleGrupoByMotivoTask(estado, "1")
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<DetalleGrupo> {
@@ -644,7 +660,7 @@ class FormCorteActivity : DaggerAppCompatActivity(), View.OnClickListener {
                             pidePhoto = d.pideFoto
                             pideLectura = d.pideLectura
                             r.codigo_Resultado = d.iD_DetalleGrupo.toString()
-                            r.causaNombre =d.descripcion
+                            r.causaNombre = d.descripcion
                             editTextCausa.setText(d.descripcion)
 
                             if (pideLectura == "NO") {

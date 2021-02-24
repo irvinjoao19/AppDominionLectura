@@ -44,6 +44,17 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
             R.id.editTextResultado -> dialogSpinner(4)
             R.id.editTextUbicacion -> dialogSpinner(5)
             R.id.editTextCausa -> dialogSpinner(6)
+            R.id.imageViewMap -> {
+                if (latitud.isNotEmpty() || longitud.isNotEmpty()) {
+                    Util.hideKeyboard(this)
+                    startActivity(Intent(this@FormReconexionActivity, MapsActivity::class.java)
+                        .putExtra("latitud", latitud)
+                        .putExtra("longitud", longitud)
+                        .putExtra("title", suministro_Numero))
+                } else {
+                    Util.toastMensaje(this@FormReconexionActivity, "Este suministro no cuenta con coordenadas")
+                }
+            }
         }
     }
 

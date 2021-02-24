@@ -119,7 +119,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     fun save(context: Context, user: Int, id: Int, tipo: String): String {
         val folder = Util.getFolder(context)
-        val nameImg: String = Util.getFechaActualForPhoto(id.toString(), 1)
+        val nameImg: String = Util.getDateFirmReconexiones(user,id, tipo)
 
         val image = File(folder, nameImg)
         val direccion = "$folder/$nameImg"

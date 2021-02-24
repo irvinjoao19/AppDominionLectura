@@ -127,6 +127,7 @@ class MainFragment : DaggerFragment() {
             intent.putExtra("nombre", "Reclamos")
             intent.putExtra("ubicacionId", s.ubicacion)
             startActivity(intent)
+            dialog.dismiss()
         }
 
         suministroViewModel.getLecturas().observe(viewLifecycleOwner) {

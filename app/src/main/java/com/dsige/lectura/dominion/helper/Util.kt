@@ -30,7 +30,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
-import androidx.work.*
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.dsige.lectura.dominion.R
 import com.dsige.lectura.dominion.data.local.model.Photo
 import com.dsige.lectura.dominion.data.workManager.GpsWork
@@ -63,10 +66,7 @@ object Util {
     val KEY_UPDATE_VERSION = "version"
     val KEY_UPDATE_URL = "url"
     val KEY_UPDATE_NAME = "name"
-
     val locale = Locale("es", "ES")
-
-    private var FechaActual: String? = ""
 
     private const val img_height_default = 800
     private const val img_width_default = 600
@@ -127,18 +127,13 @@ object Util {
         return c.get(Calendar.MONTH) + 1
     }
 
-    @SuppressLint("SimpleDateFormat")
-    fun getLastaDay(): String {
-        val sdf = SimpleDateFormat("dd/MM/yyyy")
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        return sdf.format(calendar.time)
-    }
-
-    fun getFormatDate(date: Date): String {
-        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss a")
-        return format.format(date)
-    }
+//    @SuppressLint("SimpleDateFormat")
+//    fun getLastaDay(): String {
+//        val sdf = SimpleDateFormat("dd/MM/yyyy")
+//        val calendar = Calendar.getInstance()
+//        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+//        return sdf.format(calendar.time)
+//    }
 
     fun getFecha(): String {
         val date = Date()
@@ -165,27 +160,14 @@ object Util {
         return format.format(date)
     }
 
-    fun getFechaEditar(): String? {
+
+    fun getDateFirmReconexiones(id: Int, tipo: Int, f: String): String {
         val date = Date()
-        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
-        FechaActual = format.format(date)
-        return FechaActual
+        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSS")
+        val fechaActual = format.format(date)
+        return String.format("Firm(%s)_%s_%s_%s.jpg", f, id, tipo, fechaActual)
     }
 
-    fun getFechaActualForPhoto(id: String, tipo: Int): String {
-        val date = Date()
-        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
-        FechaActual = format.format(date)
-        return id + "_" + tipo + "_" + FechaActual + ".jpg"
-    }
-
-
-    fun getFotoName(id: Int): String {
-        val date = Date()
-        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
-        FechaActual = format.format(date)
-        return String.format("Foto%s_%s.jpg", id, FechaActual)
-    }
 
     fun toggleTextInputLayoutError(textInputLayout: TextInputLayout, msg: String?) {
         textInputLayout.error = msg
@@ -208,18 +190,6 @@ object Util {
         destination.close()
     }
 
-    private fun getRealPathFromURI(context: Context, contentUri: Uri): String {
-        var result = ""
-        val proj = arrayOf(MediaStore.Video.Media.DATA)
-        @SuppressLint("Recycle") val cursor =
-            context.contentResolver.query(contentUri, proj, null, null, null)
-        if (cursor != null) {
-            val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            cursor.moveToFirst()
-            result = cursor.getString(columnIndex)
-        }
-        return result
-    }
 
     fun getFolder(context: Context): File {
         val folder = File(context.getExternalFilesDir(null)!!.absolutePath)
@@ -298,23 +268,23 @@ object Util {
     }
 
 
-    private fun copyBitmatToFile(filename: String, bitmap: Bitmap): String {
-        return try {
-            val f = File(filename)
-
-            val bos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, bos)
-            val bitmapdata = bos.toByteArray()
-
-            val fos = FileOutputStream(f)
-            fos.write(bitmapdata)
-            "true"
-
-        } catch (ex: IOException) {
-            ex.message.toString()
-        }
-
-    }
+//    private fun copyBitmatToFile(filename: String, bitmap: Bitmap): String {
+//        return try {
+//            val f = File(filename)
+//
+//            val bos = ByteArrayOutputStream()
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, bos)
+//            val bitmapdata = bos.toByteArray()
+//
+//            val fos = FileOutputStream(f)
+//            fos.write(bitmapdata)
+//            "true"
+//
+//        } catch (ex: IOException) {
+//            ex.message.toString()
+//        }
+//
+//    }
 
     private fun shrinkBitmap(file: String): Bitmap {
         val options = BitmapFactory.Options()
@@ -672,7 +642,7 @@ object Util {
         val mHour = c.get(Calendar.HOUR_OF_DAY)
         val mMinute = c.get(Calendar.MINUTE)
         val timePickerDialog =
-            TimePickerDialog(context, TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
+            TimePickerDialog(context, { _, hourOfDay, minute ->
                 val hour = if (hourOfDay < 10) "0$hourOfDay" else hourOfDay.toString()
                 val minutes = if (minute < 10) "0$minute" else minute.toString()
                 val day = if (hourOfDay < 12) "a.m." else "p.m."
@@ -681,7 +651,7 @@ object Util {
         timePickerDialog.show()
     }
 
-    fun getCompareFecha(fechaInicial: String, fechaFinal: String): Boolean {
+    private fun getCompareFecha(fechaInicial: String, fechaFinal: String): Boolean {
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("dd/MM/yyyy")
         var date1 = Date()
         try {
@@ -769,14 +739,14 @@ object Util {
         return true
     }
 
-    @Throws(IOException::class)
-    fun deleteDirectory(file: File) {
-        if (file.isDirectory) {
-            for (ct: File in file.listFiles()) {
-                ct.delete()
-            }
-        }
-    }
+//    @Throws(IOException::class)
+//    fun deleteDirectory(file: File) {
+//        if (file.isDirectory) {
+//            for (ct: File in file.listFiles()) {
+//                ct.delete()
+//            }
+//        }
+//    }
 
     fun deletePhoto(photo: String, context: Context) {
         val f = File(getFolder(context), photo)
@@ -1042,19 +1012,7 @@ object Util {
                         Log.i("TAG", "FILE CREATED")
                     }
                     copyFile(File(getImageFilePath(context, data.data!!)), f)
-//                            copyFile(File(getRealPathFromURI(context, data.data!!)), f)
                     getRightAngleImage(f.absolutePath, "")
-
-
-//                    val input =
-//                        context.contentResolver.openInputStream(data.data!!) as FileInputStream
-//                    val out = FileOutputStream(f)
-//                    val inChannel = input.channel
-//                    val outChannel = out.channel
-//                    inChannel.transferTo(0, inChannel.size(), outChannel)
-//                    input.close()
-//                    out.close()
-//                    getRightAngleImage(f.absolutePath,"")
 
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -1168,10 +1126,10 @@ object Util {
             1, 10 -> SimpleDateFormat("_HHmmssSSSS")
             else -> SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
         }
-        FechaActual = format.format(date)
+        val fechaActual = format.format(date)
         return when (tipo) {
-            1, 10 -> String.format("%s_%s_%s%s", id, tipo, fecha.replace("/", ""), FechaActual)
-            else -> String.format("%s_%s_%s", id, tipo, FechaActual)
+            1, 10 -> String.format("%s_%s_%s%s", id, tipo, fecha.replace("/", ""), fechaActual)
+            else -> String.format("%s_%s_%s", id, tipo, fechaActual)
         }
     }
 
