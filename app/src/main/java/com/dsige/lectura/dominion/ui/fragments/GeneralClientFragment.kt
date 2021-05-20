@@ -59,13 +59,8 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
         }
     }
 
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-    }
-
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-    }
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
     override fun onClick(v: View) {
         validateCliente()
@@ -104,7 +99,11 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
                             c.latitud = gps.getLatitude().toString()
                             c.longitud = gps.getLongitude().toString()
                             c.comentario = editTextComentario.text.toString()
-                            clienteViewModel.updateCliente(c, "Cliente Actualizado", requireContext())
+                            clienteViewModel.updateCliente(
+                                c,
+                                "Cliente Actualizado",
+                                requireContext()
+                            )
                             load()
                         }
                     }
@@ -285,6 +284,7 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
         }
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun createImage(tipo: Int) {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (takePictureIntent.resolveActivity(requireContext().packageManager) != null) {
@@ -377,7 +377,11 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
             }
             3 -> {
                 c.fotovVolumenSCorreMedidor = nameImg
-                clienteViewModel.updateCliente(c, "Foto sin corregir medidor guardada.", requireContext())
+                clienteViewModel.updateCliente(
+                    c,
+                    "Foto sin corregir medidor guardada.",
+                    requireContext()
+                )
             }
             4 -> {
                 c.fotovVolumenSCorreUC = nameImg
@@ -393,7 +397,11 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
             }
             6 -> {
                 c.fotovPresionMedicionUC = nameImg
-                clienteViewModel.updateCliente(c, "Foto presion de medición UC guardada", requireContext())
+                clienteViewModel.updateCliente(
+                    c,
+                    "Foto presion de medición UC guardada",
+                    requireContext()
+                )
             }
             7 -> {
                 c.fotovTemperaturaMedicionUC = nameImg
@@ -403,7 +411,11 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
             }
             8 -> {
                 c.fotoTiempoVidaBateria = nameImg
-                clienteViewModel.updateCliente(c, "Foto tiempo de bateria guardada", requireContext())
+                clienteViewModel.updateCliente(
+                    c,
+                    "Foto tiempo de bateria guardada",
+                    requireContext()
+                )
             }
             9 -> {
                 c.fotoPanomarica = nameImg
@@ -415,15 +427,27 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
             }
             11 -> {
                 c.fotoPorMezclaExplosiva = nameImg
-                clienteViewModel.updateCliente(c, "Foto Por Mezcla Explosiva guardada", requireContext())
+                clienteViewModel.updateCliente(
+                    c,
+                    "Foto Por Mezcla Explosiva guardada",
+                    requireContext()
+                )
             }
             12 -> {
                 c.fotoBateriaDescargada = nameImg
-                clienteViewModel.updateCliente(c, "Foto Bateria Descargada guardada", requireContext())
+                clienteViewModel.updateCliente(
+                    c,
+                    "Foto Bateria Descargada guardada",
+                    requireContext()
+                )
             }
             13 -> {
                 c.fotoDisplayMalogrado = nameImg
-                clienteViewModel.updateCliente(c, "Foto Display Malogrado guardada", requireContext())
+                clienteViewModel.updateCliente(
+                    c,
+                    "Foto Display Malogrado guardada",
+                    requireContext()
+                )
             }
             14 -> {
                 c.fotoTomaLectura = nameImg

@@ -42,9 +42,8 @@ internal constructor(private val roomRepository: AppRepository, private val retr
         mensajeError.value = s
     }
 
-
     fun sendFiles(context: Context) {
-        val files = roomRepository.getPhotoTaskFiles()
+        val files = roomRepository.getPhotoTaskFiles(context)
         files.flatMap { observable ->
             Observable.fromIterable(observable).flatMap { a ->
                 val b = MultipartBody.Builder()
@@ -64,7 +63,6 @@ internal constructor(private val roomRepository: AppRepository, private val retr
                     { _, t ->
                         t
                     })
-
             }
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

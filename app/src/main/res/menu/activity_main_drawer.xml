@@ -21,6 +21,11 @@
             android:title="@string/title_servicio_gps" />
 
         <item
+            android:id="@+id/recuperacion"
+            android:icon="@drawable/ic_points"
+            android:title="@string/recuperacion" />
+
+        <item
             android:id="@+id/envio"
             android:icon="@drawable/ic_points"
             android:title="@string/envio_de_pendientes" />

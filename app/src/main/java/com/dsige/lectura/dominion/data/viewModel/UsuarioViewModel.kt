@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.dsige.lectura.dominion.data.local.model.Registro
 import com.dsige.lectura.dominion.data.local.model.Sync
 import com.dsige.lectura.dominion.data.local.model.Usuario
 import com.dsige.lectura.dominion.data.local.repository.ApiError
@@ -41,26 +42,18 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Usuario> {
+                override fun onComplete() {}
                 override fun onSubscribe(d: Disposable) {}
                 override fun onNext(usuario: Usuario) {
-                    insertUsuario(usuario, version)
-                }
-
-                override fun onError(t: Throwable) {
-                    if (t is HttpException) {
-                        val body = t.response().errorBody()
-                        try {
-                            val error = retrofit.errorConverter.convert(body!!)
-                            mensajeError.postValue(error!!.Message)
-                        } catch (e1: IOException) {
-                            e1.printStackTrace()
-                        }
-                    } else {
-                        mensajeError.postValue(t.message)
+                    if (usuario.mensaje == "Pass"){
+                        mensajeError.value = "Contraseña Incorrecta"
+                    }else{
+                        insertUsuario(usuario, version)
                     }
                 }
 
-                override fun onComplete() {
+                override fun onError(t: Throwable) {
+                    mensajeError.value = t.message
                 }
             })
     }
@@ -100,40 +93,55 @@ internal constructor(private val roomRepository: AppRepository, private val retr
     }
 
     fun sync(u: Int, v: String) {
-        roomRepository.deleteSync()
+        roomRepository.getRegistrosTask()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : CompletableObserver {
+            .subscribe(object : Observer<List<Registro>> {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onError(e: Throwable) {}
-                override fun onComplete() {
-                    roomRepository.getSync(u, v)
+                override fun onComplete() {}
+                override fun onNext(t: List<Registro>) {
+                    mensajeError.value = "Antes de sincronizar asegurate de enviar tus registros"
+                }
+
+                override fun onError(e: Throwable) {
+                    roomRepository.deleteSync()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(object : Observer<Sync> {
+                        .subscribe(object : CompletableObserver {
                             override fun onSubscribe(d: Disposable) {}
-                            override fun onComplete() {}
-                            override fun onNext(t: Sync) {
-                                insertSync(t)
-                            }
+                            override fun onError(e: Throwable) {}
+                            override fun onComplete() {
+                                roomRepository.getSync(u, v)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(object : Observer<Sync> {
+                                        override fun onSubscribe(d: Disposable) {}
+                                        override fun onComplete() {}
+                                        override fun onNext(t: Sync) {
+                                            insertSync(t)
+                                        }
 
-                            override fun onError(e: Throwable) {
-                                if (e is HttpException) {
-                                    val body = e.response().errorBody()
-                                    try {
-                                        val error = retrofit.errorConverter.convert(body!!)
-                                        mensajeError.postValue(error!!.Message)
-                                    } catch (e1: IOException) {
-                                        e1.printStackTrace()
-                                        Log.i("TAG", e1.toString())
-                                    }
-                                } else {
-                                    mensajeError.postValue(e.toString())
-                                }
+                                        override fun onError(e: Throwable) {
+                                            if (e is HttpException) {
+                                                val body = e.response().errorBody()
+                                                try {
+                                                    val error =
+                                                        retrofit.errorConverter.convert(body!!)
+                                                    mensajeError.postValue(error!!.Message)
+                                                } catch (e1: IOException) {
+                                                    e1.printStackTrace()
+                                                    Log.i("TAG", e1.toString())
+                                                }
+                                            } else {
+                                                mensajeError.postValue(e.toString())
+                                            }
+                                        }
+                                    })
                             }
                         })
                 }
             })
+
     }
 
     private fun insertSync(p: Sync) {

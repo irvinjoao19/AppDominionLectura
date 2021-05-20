@@ -1,8 +1,7 @@
 package com.dsige.lectura.dominion.data.module
 
 import com.dsige.lectura.dominion.data.workManager.ChildWorkerFactory
-import com.dsige.lectura.dominion.data.workManager.GpsWork
-import com.dsige.lectura.dominion.data.workManager.LecturaWork
+import com.dsige.lectura.dominion.data.workManager.*
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -19,4 +18,9 @@ abstract class WorkerModule {
     @IntoMap
     @WorkerKey(LecturaWork::class)
     internal abstract fun bindLecturaWork(lecturaWork: LecturaWork.Factory): ChildWorkerFactory
+
+    @Binds
+    @IntoMap
+    @WorkerKey(BatteryWork::class)
+    internal abstract fun bindBatteryWork(batteryWork: BatteryWork.Factory): ChildWorkerFactory
 }

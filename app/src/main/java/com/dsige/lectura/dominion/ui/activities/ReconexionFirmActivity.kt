@@ -44,7 +44,6 @@ class ReconexionFirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 )
             R.id.fabSend -> {
                 if (online == 1) {
-                    load()
                     confirmSend()
                 } else {
                     suministroViewModel.updateRegistro(receive, tipo, 1)
@@ -263,10 +262,12 @@ class ReconexionFirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
             .setTitle("Mensaje")
             .setMessage("Estas seguro de enviar ?")
             .setPositiveButton("SI") { dialog, _ ->
+                load()
                 suministroViewModel.sendFiles(receive, this)
                 dialog.dismiss()
             }
-            .setNegativeButton("NO") { dialog, _ ->
+            .setNegativeButton("GUARDAR") { dialog, _ ->
+                suministroViewModel.updateRegistro(receive, tipo, 1)
                 dialog.cancel()
             }
         dialog.show()

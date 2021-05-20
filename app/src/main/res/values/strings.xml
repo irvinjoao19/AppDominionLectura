@@ -182,9 +182,10 @@
     <string name="existe_medidor">Existe Medidor</string>
     <string name="bateria_descargada">Bateria Descargada</string>
     <string name="galery">Galeria</string>
-    <string name="title_servicio_gps">Servicio de Gps</string>
+    <string name="title_servicio_gps">Servicio Gps</string>
     <string name="hint_lectura">Lectura</string>
     <string name="hint_medidor">Medidor</string>
     <string name="after">Adelante</string>
     <string name="before">Atras</string>
+    <string name="recuperacion">Recuperación de Fotos</string>
 </resources>

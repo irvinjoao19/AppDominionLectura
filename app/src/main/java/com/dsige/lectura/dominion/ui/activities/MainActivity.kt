@@ -3,15 +3,12 @@ package com.dsige.lectura.dominion.ui.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.TextView
@@ -30,6 +27,7 @@ import com.dsige.lectura.dominion.ui.fragments.MainFragment
 import com.dsige.lectura.dominion.data.viewModel.UsuarioViewModel
 import com.dsige.lectura.dominion.data.viewModel.ViewModelFactory
 import com.dsige.lectura.dominion.helper.Permission
+import com.dsige.lectura.dominion.ui.fragments.RecuperacionFragment
 import com.dsige.lectura.dominion.ui.fragments.SendFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,7 +38,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.get
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-
 
 
 import dagger.android.support.DaggerAppCompatActivity
@@ -117,7 +114,13 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
             "Envio de Pendientes" -> changeFragment(
                 SendFragment.newInstance("", ""), item.title.toString()
             )
-            "Servicio Gps" -> Util.executeGpsWork(this)
+            "Servicio Gps" -> {
+                Util.executeGpsWork(this)
+                Util.executeBatteryWork(this)
+            }
+            "Recuperación de Fotos" -> changeFragment(
+                RecuperacionFragment.newInstance("", ""), item.title.toString()
+            )
             "Cerrar Sesión" -> dialogFunction(
                 3,
                 "Al cerrar Sesión estaras eliminando todo tus avances. \nDeseas Salir ?"
@@ -220,6 +223,7 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
                     3 -> {
                         logout = "on"
                         Util.closeGpsWork(this)
+                        Util.closeBatteryWork(this)
                         load("Cerrando Session")
                         usuarioViewModel.logout()
                     }
@@ -295,12 +299,10 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
     private fun download(url: String, name: String) {
         val file = File(Environment.DIRECTORY_DOWNLOADS, name)
         if (file.exists()) {
-            if (file.delete()) {
-                Log.i("TAG", "deleted")
-            }
+            file.delete()
         }
         val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        Log.i("TAG", url)
+//        Log.i("TAG", url)
         val mUri = Uri.parse(url)
         val r = DownloadManager.Request(mUri)
         r.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)

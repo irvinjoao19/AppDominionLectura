@@ -2,9 +2,6 @@ package com.dsige.lectura.dominion.ui.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Address
-import android.location.Geocoder
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
@@ -14,9 +11,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.FileProvider
@@ -26,7 +21,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.dsige.lectura.dominion.BuildConfig
 import com.dsige.lectura.dominion.R
 import com.dsige.lectura.dominion.data.local.model.Photo
-import com.dsige.lectura.dominion.data.local.model.SuministroLectura
 import com.dsige.lectura.dominion.data.viewModel.SuministroViewModel
 import com.dsige.lectura.dominion.data.viewModel.ViewModelFactory
 import com.dsige.lectura.dominion.helper.Gps
@@ -35,7 +29,6 @@ import com.dsige.lectura.dominion.helper.Util
 import com.dsige.lectura.dominion.ui.adapters.PhotoAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.DaggerAppCompatActivity
-import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -43,7 +36,6 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_photo.*
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
@@ -85,7 +77,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
         when {
             tipo <= 2 || tipo == 9 || tipo == 10 -> {
                 if (cantidad == 1) {
-                    updateData(receive, tipo)
+                    updateData(receive, tipo, true)
                 } else {
                     Util.dialogMensaje(this, "Mensaje", "Se requiere 1 foto")
                 }
@@ -95,7 +87,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     if (online == 1) {
                         confirmSend()
                     } else {
-                        updateData(receive, tipo)
+                        updateData(receive, tipo, true)
                     }
                 } else {
                     Util.dialogMensaje(this, "Mensaje", "Se requiere 2 fotos")
@@ -103,7 +95,17 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
             tipo == 4 -> {
                 if (cantidad == 3) {
-                    updateData(receive, tipo)
+                    if (parentId == 92) {
+                        if (online == 1) {
+                            confirmSend()
+                        } else {
+                            updateData(receive, tipo, true)
+                        }
+                    } else {
+                        suministroViewModel.updateRegistro(receive, tipo, 2)
+                    }
+
+
                 } else {
                     Util.dialogMensaje(this, "Mensaje", "Se requiere 3 fotos")
                 }
@@ -123,10 +125,9 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var estado: Int = 0
     private var parentId: Int = 0
 
-    private var registro_Desplaza: String = ""
     private var orden: Int = 0
     private var titulo: String = ""
-    private var orden_2: Int = 0
+    private var orden2: Int = 0
     private var online: Int = 0
     private var suministro: String = ""
     private var fechaAsignacion: String = ""
@@ -142,7 +143,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             receive = bundle.getInt("envioId")
             titulo = bundle.getString("nombre")!!
             orden = bundle.getInt("orden")
-            orden_2 = bundle.getInt("orden_2")
+            orden2 = bundle.getInt("orden_2")
             tipo = bundle.getInt("tipo")
             estado = bundle.getInt("estado")
             suministro = bundle.getString("suministro", "")
@@ -183,7 +184,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
         }
 
         suministroViewModel.getRegistroBySuministro(id).observe(this) {
-            if (it != null){
+            if (it != null) {
                 parentId = it.parentId
             }
         }
@@ -200,38 +201,42 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
 
         suministroViewModel.getPhotoAllBySuministro(id, tipo, 0).observe(this) {
-            if (it.isEmpty()) {
-                goCamera()
-            }
+//            if (it.isEmpty()) {
+//                goCamera()
+//            }
 
             cantidad = it.size
             photoAdapter.addItems(it)
         }
 
         suministroViewModel.mensajeError.observe(this) {
-            closeLoad()
-            Util.toastMensaje(this, it)
+            if (it != null) {
+                closeLoad()
+                Util.toastMensaje(this, it)
+            }
         }
         suministroViewModel.mensajeSuccess.observe(this) {
-            closeLoad()
-            if (it == "firma") {
-                val intent = Intent(this@PhotoActivity, ReconexionFirmActivity::class.java)
-                intent.putExtra("envioId", receive)
-                intent.putExtra("tipo", tipo)
-                intent.putExtra("online", online)
-                intent.putExtra("orden", orden)
-                intent.putExtra("orden_2", orden_2)
-                intent.putExtra("suministro", suministro)
-                intent.putExtra("estado", estado)
-                intent.putExtra("nombre", titulo)
-                intent.putExtra("fechaAsignacion", fechaAsignacion)
-                intent.putExtra("direccion", direccion)
-                startActivity(intent)
-                finish()
-            } else {
-                siguienteOrden(tipo, estado)
+            if (it != null) {
+                closeLoad()
+                if (it == "firma") {
+                    val intent = Intent(this@PhotoActivity, ReconexionFirmActivity::class.java)
+                    intent.putExtra("envioId", receive)
+                    intent.putExtra("tipo", tipo)
+                    intent.putExtra("online", online)
+                    intent.putExtra("orden", orden)
+                    intent.putExtra("orden_2", orden2)
+                    intent.putExtra("suministro", suministro)
+                    intent.putExtra("estado", estado)
+                    intent.putExtra("nombre", titulo)
+                    intent.putExtra("fechaAsignacion", fechaAsignacion)
+                    intent.putExtra("direccion", direccion)
+                    startActivity(intent)
+                    finish()
+                } else {
+                    siguienteOrden(tipo, estado)
+                }
+                Util.toastMensaje(this, it)
             }
-            Util.toastMensaje(this, it)
         }
     }
 
@@ -320,19 +325,23 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             fechaAsignacion
         )
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            takePictureIntent.resolveActivity(packageManager)?.also {
+            takePictureIntent.resolveActivity(this.packageManager)?.also {
                 val photoFile: File? = try {
-                    Util.createImageFile(nameImg,this)
+                    Util.createImageFile(nameImg, this)
                 } catch (ex: IOException) {
                     null
                 }
                 photoFile?.also {
-                    val uriSavedImage = Uri.fromFile(it)
+                    val uriSavedImage = FileProvider.getUriForFile(
+                        this, BuildConfig.APPLICATION_ID + ".fileprovider", it
+                    )
+
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage)
 
                     if (Build.VERSION.SDK_INT >= 24) {
                         try {
-                            val m = StrictMode::class.java.getMethod("disableDeathOnFileUriExposure")
+                            val m =
+                                StrictMode::class.java.getMethod("disableDeathOnFileUriExposure")
                             m.invoke(null)
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -365,27 +374,29 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun updateData(receive: Int, tipo: Int) {
+    private fun updateData(receive: Int, tipo: Int, guardar: Boolean) {
 
         when {
             tipo <= 2 || tipo == 9 || tipo == 10 -> {
                 suministroViewModel.updateRegistro(receive, tipo, 1)
             }
             tipo == 4 -> {
-                if (parentId == 92) {
-                    if (online == 1) {
-                        load()
-                        suministroViewModel.sendFiles(receive, this)
-                    } else {
-                        suministroViewModel.updateRegistro(receive, tipo, 1)
-                    }
+                if (guardar) {
+                    suministroViewModel.updateRegistro(receive, tipo, 1)
+                    return
+                }
+                if (online == 1) {
+                    suministroViewModel.sendFiles(receive, this)
                 } else {
-                    suministroViewModel.updateRegistro(receive, tipo, 2)
+                    suministroViewModel.updateRegistro(receive, tipo, 1)
                 }
             }
             tipo == 3 -> {
+                if (guardar) {
+                    suministroViewModel.updateRegistro(receive, tipo, 1)
+                    return
+                }
                 if (online == 1) {
-                    load()
                     suministroViewModel.verificateCorte(suministro, receive, this)
                 } else {
                     suministroViewModel.updateRegistro(receive, tipo, 1)
@@ -410,7 +421,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
         }
 
-        suministroViewModel.getSuministroRight(estado, orden, orden_2)
+        suministroViewModel.getSuministroRight(estado, orden, orden2)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Int> {
@@ -455,11 +466,12 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             .setTitle("Mensaje")
             .setMessage("Estas seguro de enviar ?")
             .setPositiveButton("SI") { dialog, _ ->
-                registro_Desplaza = "1"
-                updateData(receive, tipo)
+                load()
+                updateData(receive, tipo, false)
                 dialog.dismiss()
             }
-            .setNegativeButton("NO") { dialog, _ ->
+            .setNegativeButton("GUARDAR") { dialog, _ ->
+                updateData(receive, tipo, true)
                 dialog.cancel()
             }
         dialog.show()

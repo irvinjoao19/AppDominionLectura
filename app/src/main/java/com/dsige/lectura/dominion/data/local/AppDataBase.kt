@@ -11,6 +11,7 @@ import com.dsige.lectura.dominion.data.local.model.*
     entities = [
         Usuario::class,
         OperarioGps::class,
+        OperarioBattery::class,
         Servicio::class,
         SuministroLectura::class,
         SuministroCortes::class,
@@ -42,6 +43,7 @@ abstract class AppDataBase : RoomDatabase() {
     abstract fun marcaDao(): MarcaDao
 
     abstract fun operarioGpsDao(): OperarioGpsDao
+    abstract fun operarioBatteryDao(): OperarioBatteryDao
 
     companion object {
         @Volatile

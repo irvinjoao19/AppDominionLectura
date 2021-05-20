@@ -30,10 +30,10 @@ interface ApiService {
     @POST("SaveRegistro")
     fun sendRegistro(@Body query: RequestBody): Observable<Mensaje>
 
-    @POST("SaveEstadoMovil")
-    fun saveEstadoMovil(@Body movil: RequestBody): Call<Mensaje>
+    @POST("SaveOperarioBattery")
+    fun saveOperarioBattery(@Body movil: RequestBody): Observable<Mensaje>
 
-    @POST("SaveGpsOperario")
+    @POST("SaveOperarioGps")
     fun saveOperarioGps(@Body gps: RequestBody): Observable<Mensaje>
 
     @Headers("Cache-Control: no-cache")

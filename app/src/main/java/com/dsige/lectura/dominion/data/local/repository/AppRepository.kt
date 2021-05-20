@@ -53,6 +53,12 @@ interface AppRepository {
     fun saveOperarioGps(e: OperarioGps): Observable<Mensaje>
     fun updateEnabledGps(t: Mensaje): Completable
 
+    //batterry
+    fun insertBattery(e: OperarioBattery): Completable
+    fun getSendBattery(): Observable<List<OperarioBattery>>
+    fun saveOperarioBattery(e: OperarioBattery): Observable<Mensaje>
+    fun updateEnabledBattery(t: Mensaje): Completable
+
     //Grandes Clientes
     fun getClienteById(clienteId: Int): LiveData<GrandesClientes>
     fun getClienteTaskById(clienteId: Int): Observable<GrandesClientes>
@@ -91,8 +97,9 @@ interface AppRepository {
     fun getRegistroByIdTask(id: Int): Observable<Registro>
     fun sendRegistro(body: RequestBody): Observable<Mensaje>
     fun updateEnableRegistro(t: Mensaje): Completable
-    fun getPhotoTaskFiles(): Observable<List<Photo>>
+    fun getPhotoTaskFiles(context:Context): Observable<List<Photo>>
     fun getRegistrosTask(): Observable<List<Registro>>
+    fun getRegistrosLecturasTask(): Observable<List<Registro>>
     fun getRegistros(): LiveData<List<Registro>>
     fun getPhotos(): LiveData<List<Photo>>
 
@@ -101,6 +108,9 @@ interface AppRepository {
     fun getSuministroLecturaById(id: Int): LiveData<SuministroLectura>
     fun getSuministroCorteById(id: Int): LiveData<SuministroCortes>
     fun getSuministroReconexionById(id: Int): LiveData<SuministroReconexion>
+
+    //Nuevo recuperacion de fotos
+    fun getRecoveredPhotos(): Observable<List<Photo>>
 
 
 }

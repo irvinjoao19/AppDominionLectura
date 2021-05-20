@@ -1,7 +1,6 @@
 package com.dsige.lectura.dominion.data.local.repository
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dsige.lectura.dominion.data.local.AppDataBase
 import com.dsige.lectura.dominion.data.local.model.*
@@ -12,6 +11,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import java.io.File
 
 class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDataBase) :
     AppRepository {
@@ -114,7 +114,6 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
         }
     }
-
 
     override fun getServices(): Observable<List<Servicio>> {
         return Observable.create {
@@ -247,7 +246,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun saveOperarioGps(e: OperarioGps): Observable<Mensaje> {
         val json = Gson().toJson(e)
-        Log.i("TAG", json)
+//        Log.i("TAG", json)
         val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json)
         return apiService.saveOperarioGps(body)
     }
@@ -255,7 +254,34 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun updateEnabledGps(t: Mensaje): Completable {
         return Completable.fromAction {
-            dataBase.operarioGpsDao().updateEnabledGps(t.codigoBase)
+            dataBase.operarioGpsDao().updateEnabledGps(t.codigo)
+        }
+    }
+
+    override fun insertBattery(e: OperarioBattery): Completable {
+        return Completable.fromAction {
+            dataBase.operarioBatteryDao().insertOperarioBatteryTask(e)
+        }
+    }
+
+    override fun getSendBattery(): Observable<List<OperarioBattery>> {
+        return Observable.create {
+            val gps: List<OperarioBattery> = dataBase.operarioBatteryDao().getOperarioBatteryTask()
+            it.onNext(gps)
+            it.onComplete()
+        }
+    }
+
+    override fun saveOperarioBattery(e: OperarioBattery): Observable<Mensaje> {
+        val json = Gson().toJson(e)
+//        Log.i("TAG", json)
+        val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json)
+        return apiService.saveOperarioBattery(body)
+    }
+
+    override fun updateEnabledBattery(t: Mensaje): Completable {
+        return Completable.fromAction {
+            dataBase.operarioBatteryDao().updateEnabledBattery(t.codigo)
         }
     }
 
@@ -366,7 +392,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun getRegistroBySuministroTask(id: Int): Observable<Registro> {
         return Observable.create {
-            val r: Registro? = dataBase.registroDao().getRegistroBySuministroTask(id)
+            val r: Registro? = dataBase.registroDao().getRegistroBySuministroTaskNull(id)
             if (r == null) {
                 it.onError(Throwable("No hay datos"))
                 it.onComplete()
@@ -510,7 +536,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
                 }
             }
 
-            val registro: Registro? = dataBase.registroDao().getConfirmRegistro(r.orden, r.tipo)
+            val registro: Registro? = dataBase.registroDao().getConfirmRegistro(r.iD_Suministro)
             if (registro == null) {
                 dataBase.registroDao().insertRegistroTask(r)
             } else {
@@ -614,10 +640,19 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
         }
     }
 
-    override fun getPhotoTaskFiles(): Observable<List<Photo>> {
+    override fun getPhotoTaskFiles(context: Context): Observable<List<Photo>> {
         return Observable.create {
+            val lista = ArrayList<Photo>()
             val files = dataBase.photoDao().getPhotosTask()
-            it.onNext(files)
+
+            files.forEach { p ->
+                val file = File(Util.getFolder(context), p.rutaFoto)
+                if (file.exists()) {
+                    lista.add(p)
+                }
+            }
+
+            it.onNext(lista)
             it.onComplete()
         }
     }
@@ -625,6 +660,24 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
     override fun getRegistrosTask(): Observable<List<Registro>> {
         return Observable.create {
             val r = dataBase.registroDao().getRegistroTask()
+            if (r.isEmpty()) {
+                it.onError(Throwable("No hay datos disponibles por enviar"))
+                it.onComplete()
+                return@create
+            }
+            val list: ArrayList<Registro> = ArrayList()
+            for (re: Registro in r) {
+                re.photos = dataBase.photoDao().getPhotoTask(re.iD_Suministro)
+                list.add(re)
+            }
+            it.onNext(list)
+            it.onComplete()
+        }
+    }
+
+    override fun getRegistrosLecturasTask(): Observable<List<Registro>> {
+        return Observable.create {
+            val r = dataBase.registroDao().getRegistroLecturaTask()
             if (r.isEmpty()) {
                 it.onError(Throwable("No hay datos disponibles por enviar"))
                 it.onComplete()
@@ -649,7 +702,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
     }
 
     override fun getSuministroLecturaById(id: Int): LiveData<SuministroLectura> {
-    return dataBase.lecturaDao().getSuministroLecturaById(id)
+        return dataBase.lecturaDao().getSuministroLecturaById(id)
     }
 
     override fun getSuministroCorteById(id: Int): LiveData<SuministroCortes> {
@@ -658,6 +711,14 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun getSuministroReconexionById(id: Int): LiveData<SuministroReconexion> {
         return dataBase.reconexionDao().getSuministroReconexionById(id)
+    }
+
+    override fun getRecoveredPhotos(): Observable<List<Photo>> {
+        return Observable.create {
+            val files = dataBase.photoDao().getPhotosTask()
+            it.onNext(files)
+            it.onComplete()
+        }
     }
 
 }

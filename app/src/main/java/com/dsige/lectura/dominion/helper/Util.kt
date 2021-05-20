@@ -12,6 +12,7 @@ import android.graphics.*
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -29,13 +30,16 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.dsige.lectura.dominion.BuildConfig
 import com.dsige.lectura.dominion.R
 import com.dsige.lectura.dominion.data.local.model.Photo
+import com.dsige.lectura.dominion.data.workManager.BatteryWork
 import com.dsige.lectura.dominion.data.workManager.GpsWork
 import com.dsige.lectura.dominion.data.workManager.LecturaWork
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -45,12 +49,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.channels.FileChannel
 import java.text.DecimalFormat
 import java.text.ParseException
@@ -59,6 +67,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.math.*
+
 
 object Util {
 
@@ -154,7 +163,7 @@ object Util {
         return format.format(date)
     }
 
-    fun getHoraActual(): String {
+    private fun getHoraActual(): String {
         val date = Date()
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("HH:mm:ss aaa")
         return format.format(date)
@@ -166,6 +175,7 @@ object Util {
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSS")
         val fechaActual = format.format(date)
         return String.format("Firm(%s)_%s_%s_%s.jpg", f, id, tipo, fechaActual)
+
     }
 
 
@@ -751,7 +761,12 @@ object Util {
     fun deletePhoto(photo: String, context: Context) {
         val f = File(getFolder(context), photo)
         if (f.exists()) {
+            val uriSavedImage = FileProvider.getUriForFile(
+                context, BuildConfig.APPLICATION_ID + ".fileprovider", f
+            )
+            context.contentResolver.delete(uriSavedImage, null, null)
             f.delete()
+
         }
     }
 
@@ -846,11 +861,10 @@ object Util {
     ): String {
         try {
             val ei = ExifInterface(photoPath)
-            val orientation =
-                ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-            val degree: Int
-
-            degree = when (orientation) {
+            val degree: Int = when (ei.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )) {
                 ExifInterface.ORIENTATION_NORMAL -> 0
                 ExifInterface.ORIENTATION_ROTATE_90 -> 90
                 ExifInterface.ORIENTATION_ROTATE_180 -> 180
@@ -1046,6 +1060,13 @@ object Util {
         }
     }
 
+    fun getUpdatePhotoAdjunto(): Completable {
+        return Completable.fromAction {
+
+
+        }
+    }
+
     private fun getImageFilePath(context: Context, uri: Uri): String {
         var path = ""
         var image_id: String? = null
@@ -1114,6 +1135,28 @@ object Util {
         WorkManager.getInstance(context).cancelAllWorkByTag("Gps-Work")
     }
 
+    fun executeBatteryWork(context: Context) {
+//        val downloadConstraints = Constraints.Builder()
+//            .setRequiresCharging(true)
+//            .setRequiredNetworkType(NetworkType.CONNECTED)
+//            .build()
+        val locationWorker =
+            PeriodicWorkRequestBuilder<BatteryWork>(15, TimeUnit.MINUTES)
+//                .setConstraints(downloadConstraints)
+                .build()
+        WorkManager
+            .getInstance(context)
+            .enqueueUniquePeriodicWork(
+                "Battery-Work",
+                ExistingPeriodicWorkPolicy.REPLACE,
+                locationWorker
+            )
+    }
+
+    fun closeBatteryWork(context: Context) {
+        WorkManager.getInstance(context).cancelAllWorkByTag("Battery-Work")
+    }
+
     fun getFechaForGrandesCliente(code: String): String {
         val date = Date()
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
@@ -1149,4 +1192,12 @@ object Util {
 //        }
     }
 
+    fun getMobileDataState(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val cmClass = Class.forName(cm.javaClass.name)
+        val method = cmClass.getDeclaredMethod("getMobileDataEnabled")
+        method.isAccessible = true // Make the method callable
+        // get the setting for "mobile data"
+        return method.invoke(cm) as Boolean
+    }
 }

@@ -48,12 +48,17 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
             R.id.imageViewMap -> {
                 if (latitud.isNotEmpty() || longitud.isNotEmpty()) {
                     Util.hideKeyboard(this)
-                    startActivity(Intent(this@FormLecturaActivity, MapsActivity::class.java)
-                        .putExtra("latitud", latitud)
-                        .putExtra("longitud", longitud)
-                        .putExtra("title", suministro_Numero))
+                    startActivity(
+                        Intent(this@FormLecturaActivity, MapsActivity::class.java)
+                            .putExtra("latitud", latitud)
+                            .putExtra("longitud", longitud)
+                            .putExtra("title", suministro_Numero)
+                    )
                 } else {
-                    Util.toastMensaje(this@FormLecturaActivity, "Este suministro no cuenta con coordenadas")
+                    Util.toastMensaje(
+                        this@FormLecturaActivity,
+                        "Este suministro no cuenta con coordenadas"
+                    )
                 }
             }
         }
@@ -183,6 +188,7 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 goToPhoto()
             } else {
                 Util.toastMensaje(this, it)
+                clearView()
                 beforeOrAfterSuministro(estado, "Next")
             }
         }
@@ -455,7 +461,8 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun clearView() {
-
+        r = Registro()
+        editTextLectura.text = null
     }
 
     /**
@@ -494,18 +501,13 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<SuministroLectura> {
-                override fun onComplete() {
-                }
-
-                override fun onSubscribe(d: Disposable) {
-                }
-
+                override fun onComplete() {}
+                override fun onSubscribe(d: Disposable) {}
+                override fun onError(e: Throwable) {}
                 override fun onNext(s: SuministroLectura) {
 //                    clearText()
                     showSuministro(s)
                 }
-
-                override fun onError(e: Throwable) {}
             })
     }
 
@@ -571,8 +573,8 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
                         layoutNroLectura.visibility = View.GONE
                         editTextLectura.text = null
 
-                        val obs: List<String>? = d.registro_Observacion.split("/")
-                        if (obs != null) {
+                        val obs: List<String> = d.registro_Observacion.split("/")
+                        if (obs.isNotEmpty()) {
                             editTextMedidor.setText(obs[0])
                             editTextLectura2.setText(obs[1])
                         }
@@ -617,8 +619,8 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun formRegistro() {
-        val valConfirm: String? = editTextLectura.text.toString()
-        val lectura: Int = if (valConfirm.isNullOrEmpty()) 0 else valConfirm.toInt()
+        val valConfirm: String = editTextLectura.text.toString()
+        val lectura: Int = if (valConfirm.isEmpty()) 0 else valConfirm.toInt()
         val gps = Gps(this)
         if (gps.isLocationEnabled()) {
             if (gps.getLatitude().toString() == "0.0" || gps.getLongitude().toString() == "0.0") {
@@ -629,7 +631,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 r.registro_Longitud = gps.getLongitude().toString()
                 r.registro_Lectura = editTextLectura.text.toString()
                 r.registro_Confirmar_Lectura = editTextLectura.text.toString()
-
 
                 r.registro_Observacion = if (grupoId == 5) {
                     editTextMedidor.text.toString() + "/" + editTextLectura2.text.toString()

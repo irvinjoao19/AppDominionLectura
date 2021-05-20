@@ -42,8 +42,8 @@ internal constructor(
         }
     }
 
-   private fun sendFiles(context: Context) {
-        val files = roomRepository.getPhotoTaskFiles()
+    private fun sendFiles(context: Context) {
+        val files = roomRepository.getPhotoTaskFiles(context)
         files.flatMap { observable ->
             Observable.fromIterable(observable).flatMap { a ->
                 val b = MultipartBody.Builder()
@@ -75,13 +75,13 @@ internal constructor(
 
                 override fun onNext(t: String) {}
                 override fun onError(t: Throwable) {
-                    Log.i("TAG",t.message.toString())
+                    Log.i("TAG", t.message.toString())
                 }
             })
     }
 
     private fun sendSuministro() {
-        val register: Observable<List<Registro>> = roomRepository.getRegistrosTask()
+        val register: Observable<List<Registro>> = roomRepository.getRegistrosLecturasTask()
         register.flatMap { observable ->
             Observable.fromIterable(observable).flatMap { a ->
                 val json = Gson().toJson(a)
@@ -103,7 +103,7 @@ internal constructor(
                 }
 
                 override fun onError(t: Throwable) {
-                    Log.i("TAG",t.message.toString())
+                    Log.i("TAG", t.message.toString())
                 }
             })
     }

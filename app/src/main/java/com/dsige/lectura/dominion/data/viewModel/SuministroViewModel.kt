@@ -36,6 +36,7 @@ internal constructor(private val roomRepository: AppRepository, private val retr
     val mensajeSuccess = MutableLiveData<String>()
     val servicios: MutableLiveData<List<Servicio>> = MutableLiveData()
     val lecturas: MutableLiveData<IntArray> = MutableLiveData()
+    val recoveredPhotos: MutableLiveData<List<Photo>> = MutableLiveData()
 
     val user: LiveData<Usuario>
         get() = roomRepository.getUsuario()
@@ -60,6 +61,24 @@ internal constructor(private val roomRepository: AppRepository, private val retr
 
     fun getServicios(): LiveData<List<Servicio>> {
         return servicios
+    }
+
+    fun getRecoveredPhotos() {
+        roomRepository.getRecoveredPhotos()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<List<Photo>> {
+                override fun onSubscribe(d: Disposable) {}
+                override fun onError(e: Throwable) {}
+                override fun onComplete() {}
+                override fun onNext(t: List<Photo>) {
+                    recoveredPhotos.value = t
+                }
+            })
+    }
+
+    fun getPhotosRecuperadas(): LiveData<List<Photo>> {
+        return recoveredPhotos
     }
 
     fun getTipoLectura() {
@@ -241,13 +260,38 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             })
     }
 
+//    fun updateArchivo(
+//        nameImg: String,
+//        id: Context
+//    ) {
+//        Util.getPhotoAdjunto(
+//            nameImg, context, fechaAsignacion, direccion,
+//            latitud, longitud, receive, tipo
+//        )
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe(object : Observer<Photo> {
+//                override fun onSubscribe(d: Disposable) {}
+//                override fun onNext(t: Photo) {
+//                    insertPhoto(t)
+//                }
+//
+//                override fun onError(e: Throwable) {}
+//                override fun onComplete() {}
+//            })
+//    }
+
+
     fun verificateCorte(s: String, id: Int, context: Context) {
         roomRepository.getVerificateCorte(s)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Mensaje> {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onError(e: Throwable) {}
+                override fun onError(e: Throwable) {
+                    mensajeError.value = e.message.toString()
+                }
+
                 override fun onComplete() {}
                 override fun onNext(t: Mensaje) {
                     if (t.codigo == 0) {

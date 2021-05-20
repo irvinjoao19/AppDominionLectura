@@ -21,7 +21,6 @@ import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_login.*
 import javax.inject.Inject
 
-
 class LoginActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
     override fun onRequestPermissionsResult(
@@ -142,6 +141,7 @@ class LoginActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
     private fun goMainActivity() {
         Util.executeGpsWork(this)
+        Util.executeBatteryWork(this)
         startActivity(
             Intent(this, MainActivity::class.java)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
