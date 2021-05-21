@@ -574,7 +574,10 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun insertPhoto(p: Photo): Completable {
         return Completable.fromAction {
-            dataBase.photoDao().insertPhotoTask(p)
+            val photo = dataBase.photoDao().getExistePhoto(p.rutaFoto)
+            if (photo == 0) {
+                dataBase.photoDao().insertPhotoTask(p)
+            }
         }
     }
 

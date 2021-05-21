@@ -234,12 +234,15 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Photo> {
                 override fun onSubscribe(d: Disposable) {}
+                override fun onComplete() {}
                 override fun onNext(t: Photo) {
                     insertPhoto(t)
                 }
 
-                override fun onError(e: Throwable) {}
-                override fun onComplete() {}
+                override fun onError(e: Throwable) {
+                    mensajeError.value = e.message
+                }
+
             })
     }
 

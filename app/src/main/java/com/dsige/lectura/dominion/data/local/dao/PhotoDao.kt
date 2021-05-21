@@ -39,4 +39,7 @@ interface PhotoDao {
 
     @Query("SELECT * FROM Photo WHERE iD_Suministro=:id AND firm = 1 ")
     fun getPhotoFirm(id: Int): LiveData<List<Photo>>
+
+    @Query("SELECT COUNT(*) FROM Photo WHERE rutaFoto=:r ")
+    fun getExistePhoto(r: String): Int
 }

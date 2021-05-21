@@ -1042,20 +1042,22 @@ object Util {
         latitud: String, longitud: String, receive: Int, tipo: Int
     ): Observable<Photo> {
         return Observable.create {
-
             val f = File(getFolder(context), "$nameImg.jpg")
             if (f.exists()) {
                 getAngleImage(context, f.absolutePath, fechaAsignacion, direccion)
+                val photo = Photo()
+                photo.iD_Suministro = receive
+                photo.rutaFoto = "$nameImg.jpg"
+                photo.fecha_Sincronizacion_Android = getFechaActual()
+                photo.tipo = tipo
+                photo.estado = 1
+                photo.latitud = latitud
+                photo.longitud = longitud
+                it.onNext(photo)
+                it.onComplete()
+                return@create
             }
-            val photo = Photo()
-            photo.iD_Suministro = receive
-            photo.rutaFoto = "$nameImg.jpg"
-            photo.fecha_Sincronizacion_Android = getFechaActual()
-            photo.tipo = tipo
-            photo.estado = 1
-            photo.latitud = latitud
-            photo.longitud = longitud
-            it.onNext(photo)
+            it.onError(Throwable("No se encontro la foto fisica favor de volver a tomar foto"))
             it.onComplete()
         }
     }
