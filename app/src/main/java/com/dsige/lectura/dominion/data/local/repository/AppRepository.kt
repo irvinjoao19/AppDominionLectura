@@ -111,6 +111,7 @@ interface AppRepository {
 
     //Nuevo recuperacion de fotos
     fun getRecoveredPhotos(): Observable<List<Photo>>
+    fun getAllPhotos(context: Context): Observable<ArrayList<String>>
 
 
 }

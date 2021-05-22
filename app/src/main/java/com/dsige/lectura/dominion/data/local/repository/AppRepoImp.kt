@@ -724,4 +724,22 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
         }
     }
 
+    override fun getAllPhotos(context: Context): Observable<ArrayList<String>> {
+        return Observable.create { e ->
+            val filePaths: ArrayList<String> = ArrayList()
+            val directory = Util.getFolder(context)
+            val files = directory.listFiles()
+            if (files == null) {
+                e.onError(Throwable("No hay fotos registrados"))
+                e.onComplete()
+                return@create
+            }
+
+            for (i in files.indices) {
+                filePaths.add(files[i].toString())
+            }
+            e.onNext(filePaths)
+            e.onComplete()
+        }
+    }
 }

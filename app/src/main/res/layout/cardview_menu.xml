@@ -10,27 +10,35 @@
     android:foreground="?android:attr/selectableItemBackground"
     app:cardCornerRadius="10dp"
     app:cardElevation="8dp"
-    tools:context=".ui.adapters.ServicioAdapter"
-    tools:ignore="UnusedAttribute">
+    tools:context=".ui.adapters.ServicioAdapter">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ru.nikartm.support.ImageBadgeView
+        <ImageView
             android:id="@+id/imageViewPhoto"
-            android:layout_width="50dp"
+            android:layout_width="60dp"
             android:layout_height="50dp"
-            android:layout_marginTop="8dp"
-            app:ibv_badgeColor="@color/colorRed"
-            app:ibv_badgeLimitValue="false"
-            app:ibv_badgeTextColor="@color/colorWhite"
-            app:ibv_badgeTextSize="17sp"
-            app:ibv_badgeTextStyle="bold"
-            app:ibv_badgePadding="2dp"
-            app:srcCompat="@drawable/ic_search"
+            android:layout_marginTop="10dp"
+            android:contentDescription="@string/img"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_camera" />
+
+        <TextView
+            android:id="@+id/textViewValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/notification"
+            android:elevation="8dp"
+            android:text="@string/number"
+            android:textColor="@color/colorWhite"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewPhoto"
+            app:layout_constraintHorizontal_bias="0.95"
+            app:layout_constraintStart_toStartOf="@+id/imageViewPhoto"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView

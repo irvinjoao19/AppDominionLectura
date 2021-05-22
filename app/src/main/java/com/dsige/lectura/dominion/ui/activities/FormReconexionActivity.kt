@@ -169,6 +169,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
         editTextCausa.setOnClickListener(this)
 
         suministroViewModel.mensajeSuccess.observe(this) {
+            buttonGrabar.visibility = View.VISIBLE
             if (it == "photo") {
                 goToPhoto()
             } else {
@@ -177,6 +178,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
         }
         suministroViewModel.mensajeError.observe(this) {
+            buttonGrabar.visibility = View.VISIBLE
             Util.toastMensaje(this, it)
         }
     }
@@ -320,8 +322,8 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                         layoutNroLectura.visibility = View.GONE
                         editTextLectura.text = null
 
-                        val obs: List<String>? = d.registro_Observacion.split("/")
-                        if (obs != null) {
+                        val obs: List<String> = d.registro_Observacion.split("/")
+                        if (obs.isNotEmpty()) {
                             editTextMedidor.setText(obs[0])
                             editTextLectura2.setText(obs[1])
                         }
@@ -357,10 +359,12 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun formRegistro() {
+        buttonGrabar.visibility = View.INVISIBLE
         val gps = Gps(this)
         if (gps.isLocationEnabled()) {
             if (gps.getLatitude().toString() == "0.0" || gps.getLongitude().toString() == "0.0") {
                 gps.showAlert(this)
+                buttonGrabar.visibility = View.VISIBLE
             } else {
                 Util.hideKeyboard(this)
                 r.registro_Latitud = gps.getLatitude().toString()
@@ -429,6 +433,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 suministroViewModel.insertRegistro(r)
             }
         } else {
+            buttonGrabar.visibility = View.VISIBLE
             gps.showSettingsAlert(this)
         }
     }

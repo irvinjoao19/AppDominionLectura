@@ -188,4 +188,6 @@
     <string name="after">Adelante</string>
     <string name="before">Atras</string>
     <string name="recuperacion">Recuperación de Fotos</string>
+    <string name="number">19</string>
+    <string name="title_file">Reenviar Fotos</string>
 </resources>

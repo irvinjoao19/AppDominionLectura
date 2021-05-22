@@ -32,6 +32,7 @@ class SuministroViewModel @Inject
 internal constructor(private val roomRepository: AppRepository, private val retrofit: ApiError) :
     ViewModel() {
 
+    val mensajeAlert= MutableLiveData<String>()
     val mensajeError = MutableLiveData<String>()
     val mensajeSuccess = MutableLiveData<String>()
     val servicios: MutableLiveData<List<Servicio>> = MutableLiveData()
@@ -43,6 +44,10 @@ internal constructor(private val roomRepository: AppRepository, private val retr
 
     fun setError(s: String) {
         mensajeError.value = s
+    }
+
+    fun setAlert(s:String){
+        mensajeAlert.value = s
     }
 
     fun getServices() {

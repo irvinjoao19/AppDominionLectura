@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.provider.MediaStore
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
@@ -48,27 +49,25 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun formPhoto() {
+        buttonPhoto.visibility = View.INVISIBLE
         when {
             tipo <= 2 || tipo == 9 || tipo == 10 -> {
                 if (cantidad < 1) {
                     goCamera()
-                } else {
-                    Util.dialogMensaje(this, "Mensaje", "Maximo 1 foto")
-                }
+                } else
+                    suministroViewModel.setAlert("Maximo 1 foto")
             }
             tipo == 3 -> {
                 if (cantidad < 2) {
                     goCamera()
-                } else {
-                    Util.dialogMensaje(this, "Mensaje", "Maximo 2 fotos")
-                }
+                } else
+                    suministroViewModel.setAlert("Maximo 2 fotos")
             }
             tipo == 4 -> {
                 if (cantidad < 3) {
                     goCamera()
-                } else {
-                    Util.dialogMensaje(this, "Mensaje", "Maximo 3 fotos")
-                }
+                } else
+                    suministroViewModel.setAlert("Maximo 3 fotos")
             }
         }
     }
@@ -78,9 +77,8 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             tipo <= 2 || tipo == 9 || tipo == 10 -> {
                 if (cantidad == 1) {
                     updateData(receive, tipo, true)
-                } else {
-                    Util.dialogMensaje(this, "Mensaje", "Se requiere 1 foto")
-                }
+                } else
+                    suministroViewModel.setAlert("Se requiere 1 foto")
             }
             tipo == 3 -> {
                 if (cantidad == 2) {
@@ -89,9 +87,8 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     } else {
                         updateData(receive, tipo, true)
                     }
-                } else {
-                    Util.dialogMensaje(this, "Mensaje", "Se requiere 2 fotos")
-                }
+                } else
+                    suministroViewModel.setAlert("Se requiere 2 fotos")
             }
             tipo == 4 -> {
                 if (cantidad == 3) {
@@ -104,11 +101,8 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     } else {
                         suministroViewModel.updateRegistro(receive, tipo, 2)
                     }
-
-
-                } else {
-                    Util.dialogMensaje(this, "Mensaje", "Se requiere 3 fotos")
-                }
+                } else
+                    suministroViewModel.setAlert("Se requiere 3 fotos")
             }
         }
     }
@@ -131,9 +125,17 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var online: Int = 0
     private var suministro: String = ""
     private var fechaAsignacion: String = ""
-    private var direccion: String = ""
+    private var direction: String = ""
     private var nameImg: String = ""
     private var ubicacionId: Int = 0
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("fileName", direction)
+        outState.putString("nameImg", nameImg)
+        outState.putInt("parentId", parentId)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,7 +150,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             estado = bundle.getInt("estado")
             suministro = bundle.getString("suministro", "")
             fechaAsignacion = bundle.getString("fechaAsignacion", "")
-            direccion = bundle.getString("direccion", "")
+            direction = bundle.getString("direccion", "")
             ubicacionId = bundle.getInt("ubicacionId")
             bindUI(receive, tipo)
         }
@@ -209,14 +211,21 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
             photoAdapter.addItems(it)
         }
 
+        suministroViewModel.mensajeAlert.observe(this) {
+            buttonPhoto.visibility = View.VISIBLE
+            Util.dialogMensaje(this, "Mensaje", it)
+        }
+
         suministroViewModel.mensajeError.observe(this) {
             if (it != null) {
+                buttonPhoto.visibility = View.VISIBLE
                 closeLoad()
                 Util.toastMensaje(this, it)
             }
         }
         suministroViewModel.mensajeSuccess.observe(this) {
             if (it != null) {
+                buttonPhoto.visibility = View.VISIBLE
                 closeLoad()
                 if (it == "firma") {
                     val intent = Intent(this@PhotoActivity, ReconexionFirmActivity::class.java)
@@ -229,7 +238,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     intent.putExtra("estado", estado)
                     intent.putExtra("nombre", titulo)
                     intent.putExtra("fechaAsignacion", fechaAsignacion)
-                    intent.putExtra("direccion", direccion)
+                    intent.putExtra("direccion", direction)
                     startActivity(intent)
                     finish()
                 } else {
@@ -262,7 +271,6 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
         return super.onKeyDown(keyCode, event)
     }
 
-
     private fun showPopupMenu(p: Photo, v: View) {
         val popupMenu = PopupMenu(this, v)
         popupMenu.menu.add(0, Menu.FIRST, 0, getText(R.string.ver))
@@ -270,10 +278,9 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> {
-//                    val intent = Intent(this@PhotoActivity, ::class.java)
-//                    intent.putExtra("nombre", p.rutaFoto)
-//                    intent.putExtra("envioId", p.iD_Foto)
-//                    startActivity(intent)
+                    val intent = Intent(this@PhotoActivity, PreviewCameraActivity::class.java)
+                    intent.putExtra("nameImg", p.rutaFoto)
+                    startActivity(intent)
                 }
                 2 -> confirmDeletePhoto(p)
 
@@ -362,7 +369,7 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     nameImg,
                     this@PhotoActivity,
                     fechaAsignacion,
-                    direccion,
+                    direction,
                     gps.getLatitude().toString(),
                     gps.getLongitude().toString(),
                     receive,
@@ -372,10 +379,10 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 gps.showSettingsAlert(this)
             }
         }
+        buttonPhoto.visibility = View.VISIBLE
     }
 
     private fun updateData(receive: Int, tipo: Int, guardar: Boolean) {
-
         when {
             tipo <= 2 || tipo == 9 || tipo == 10 -> {
                 suministroViewModel.updateRegistro(receive, tipo, 1)
@@ -400,7 +407,6 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     suministroViewModel.verificateCorte(suministro, receive, this)
                 } else {
                     suministroViewModel.updateRegistro(receive, tipo, 1)
-
                 }
             }
         }

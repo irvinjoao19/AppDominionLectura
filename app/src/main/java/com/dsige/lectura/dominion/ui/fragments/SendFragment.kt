@@ -24,7 +24,17 @@ private const val ARG_PARAM2 = "param2"
 class SendFragment : DaggerFragment(), View.OnClickListener {
 
     override fun onClick(v: View) {
-        confirmSend()
+        when (v.id) {
+            R.id.btnEnvio -> {
+                btnEnvio.visibility = View.INVISIBLE
+                confirmSend(1)
+            }
+            R.id.btnFile -> {
+                btnFile.visibility = View.INVISIBLE
+                confirmSend(2)
+            }
+        }
+
     }
 
     @Inject
@@ -32,7 +42,6 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
     lateinit var sendViewModel: SendViewModel
     lateinit var builder: AlertDialog.Builder
     private var dialog: AlertDialog? = null
-
 
     private var param1: String? = null
     private var param2: String? = null
@@ -60,10 +69,12 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
         sendViewModel =
             ViewModelProvider(this, viewModelFactory).get(SendViewModel::class.java)
 
-
         sendViewModel.getRegistros().observe(viewLifecycleOwner) {
             if (it != null) {
-                imgBadge.badgeValue = it.size
+                if (it.isEmpty()){
+                    textViewValue.visibility = View.INVISIBLE
+                }
+                textViewValue.text = it.size.toString()
                 txt1.text = String.format("Registros : %s", it.size)
             }
         }
@@ -74,22 +85,26 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
             }
         }
 
-
         sendViewModel.mensajeSuccess.observe(viewLifecycleOwner) {
+            btnEnvio.visibility = View.VISIBLE
+            btnFile.visibility = View.VISIBLE
             closeLoad()
             Util.toastMensaje(requireContext(), it)
         }
 
         sendViewModel.mensajeError.observe(viewLifecycleOwner) {
+            btnEnvio.visibility = View.VISIBLE
+            btnFile.visibility = View.VISIBLE
             closeLoad()
             Util.toastMensaje(requireContext(), it)
         }
 
         btnEnvio.setOnClickListener(this)
+        btnFile.setOnClickListener(this)
     }
 
-    private fun confirmSend() {
-        MaterialAlertDialogBuilder(context!!)
+    private fun confirmSend(tipo: Int) {
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("Mensaje")
             .setMessage(
                 String.format(
@@ -99,7 +114,10 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
             )
             .setPositiveButton("Aceptar") { dialog, _ ->
                 load()
-                sendViewModel.sendFiles(requireContext())
+                when (tipo) {
+                    1 -> sendViewModel.sendFiles(requireContext())
+                    2 -> sendViewModel.sendPhoto(requireContext())
+                }
                 dialog.dismiss()
             }.setNegativeButton("No") { dialog, _ ->
                 dialog.dismiss()

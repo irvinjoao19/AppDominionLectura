@@ -38,33 +38,44 @@ class ServicioAdapter(private var listener: OnItemClickListener.ServicesListener
                 when (s.nombre_servicio) {
                     "Lectura" -> {
                         imageViewPhoto.setImageResource(R.drawable.ic_lectura)
-                        imageViewPhoto.badgeValue = s.size
                         textViewTitulo.text = s.nombre_servicio
+                        if (s.size == 0) {
+                            textViewValue.visibility = View.GONE
+                        } else
+                            textViewValue.text = s.size.toString()
+
                     }
                     "Relectura" -> {
-                        imageViewPhoto.badgeValue = s.size
                         imageViewPhoto.setImageResource(R.drawable.ic_relectura)
                         textViewTitulo.text = s.nombre_servicio
+                        if (s.size == 0) {
+                            textViewValue.visibility = View.GONE
+                        } else
+                            textViewValue.text = s.size.toString()
                     }
                     "Cortes" -> {
-                        imageViewPhoto.badgeValue = s.size
                         imageViewPhoto.setImageResource(R.drawable.ic_cortes)
                         textViewTitulo.text = s.nombre_servicio
+                        if (s.size == 0) {
+                            textViewValue.visibility = View.GONE
+                        } else
+                            textViewValue.text = s.size.toString()
                     }
                     "Reconexiones" -> {
-                        imageViewPhoto.badgeValue = s.size
                         imageViewPhoto.setImageResource(R.drawable.ic_reconexiones)
                         textViewTitulo.text = s.nombre_servicio
+                        if (s.size == 0) {
+                            textViewValue.visibility = View.GONE
+                        } else
+                            textViewValue.text = s.size.toString()
                     }
-//                    "Distribucion" -> {
-//                        imageViewPhoto.badgeValue = s.size
-//                        imageViewPhoto.setImageResource(R.drawable.ic_reparto)
-//                        textViewTitulo.text = s.nombre_servicio
-//                    }
                     "Grandes Clientes" -> {
-                        imageViewPhoto.badgeValue = s.size
                         imageViewPhoto.setImageResource(R.drawable.ic_grandes_clientes)
                         textViewTitulo.text = s.nombre_servicio
+                        if (s.size == 0) {
+                            textViewValue.visibility = View.GONE
+                        } else
+                            textViewValue.text = s.size.toString()
                     }
                     else -> textViewTitulo.text = s.nombre_servicio
                 }

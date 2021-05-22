@@ -42,12 +42,16 @@
         tools:targetApi="m">
         <activity android:name=".ui.activities.FirmActivity" />
         <activity android:name=".ui.activities.ReconexionFirmActivity" />
-        <activity android:name=".ui.activities.PhotoActivity" />
+        <activity
+            android:name=".ui.activities.PhotoActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
         <activity android:name=".ui.activities.FormReconexionActivity" />
         <activity android:name=".ui.activities.FormCorteActivity" />
         <activity android:name=".ui.activities.BigClientsActivity" />
         <activity android:name=".ui.activities.FormLecturaActivity" />
         <activity android:name=".ui.activities.PendingLocationMapsActivity" />
+        <activity android:name=".ui.activities.PreviewCameraActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -70,13 +74,13 @@
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="${applicationId}.workmanager-init"
             android:exported="false"
-            tools:node="remove"/>
+            tools:node="remove" />
 
-<!--        <provider-->
-<!--            android:name=".data.MyWorkManagerInitializer"-->
-<!--            android:authorities="${applicationId}.workmanager-init"-->
-<!--            android:exported="false"-->
-<!--            tools:node="remove" />-->
+        <!--        <provider-->
+        <!--            android:name=".data.MyWorkManagerInitializer"-->
+        <!--            android:authorities="${applicationId}.workmanager-init"-->
+        <!--            android:exported="false"-->
+        <!--            tools:node="remove" />-->
 
         <provider
             android:name="androidx.core.content.FileProvider"
