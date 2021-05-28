@@ -47,12 +47,17 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
             R.id.imageViewMap -> {
                 if (latitud.isNotEmpty() || longitud.isNotEmpty()) {
                     Util.hideKeyboard(this)
-                    startActivity(Intent(this@FormReconexionActivity, MapsActivity::class.java)
-                        .putExtra("latitud", latitud)
-                        .putExtra("longitud", longitud)
-                        .putExtra("title", suministro_Numero))
+                    startActivity(
+                        Intent(this@FormReconexionActivity, MapsActivity::class.java)
+                            .putExtra("latitud", latitud)
+                            .putExtra("longitud", longitud)
+                            .putExtra("title", suministro_Numero)
+                    )
                 } else {
-                    Util.toastMensaje(this@FormReconexionActivity, "Este suministro no cuenta con coordenadas")
+                    Util.toastMensaje(
+                        this@FormReconexionActivity,
+                        "Este suministro no cuenta con coordenadas"
+                    )
                 }
             }
         }
@@ -82,7 +87,6 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var titulo: String = ""
     private var estado: Int = 0
     private var online: Int = 0
-    private var operarioId: Int = 0
 
     // Se utiliza para Lectura Recuperadas
     private var recuperada = 0
@@ -169,7 +173,6 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
         editTextCausa.setOnClickListener(this)
 
         suministroViewModel.mensajeSuccess.observe(this) {
-            buttonGrabar.visibility = View.VISIBLE
             if (it == "photo") {
                 goToPhoto()
             } else {
@@ -178,7 +181,6 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
         }
         suministroViewModel.mensajeError.observe(this) {
-            buttonGrabar.visibility = View.VISIBLE
             Util.toastMensaje(this, it)
         }
     }
@@ -341,7 +343,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun getComboObservacion() {
-        suministroViewModel.getDetalleGrupoByMotivoTask(estado,"1")
+        suministroViewModel.getDetalleGrupoByMotivoTask(estado, "1")
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<DetalleGrupo> {
@@ -359,12 +361,10 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun formRegistro() {
-        buttonGrabar.visibility = View.INVISIBLE
         val gps = Gps(this)
         if (gps.isLocationEnabled()) {
             if (gps.getLatitude().toString() == "0.0" || gps.getLongitude().toString() == "0.0") {
                 gps.showAlert(this)
-                buttonGrabar.visibility = View.VISIBLE
             } else {
                 Util.hideKeyboard(this)
                 r.registro_Latitud = gps.getLatitude().toString()
@@ -401,7 +401,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     }
                 }
 
-                if (r.motivoId == 0){
+                if (r.motivoId == 0) {
                     suministroViewModel.setError("Eliga un motivo")
                     return
                 }
@@ -433,7 +433,6 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                 suministroViewModel.insertRegistro(r)
             }
         } else {
-            buttonGrabar.visibility = View.VISIBLE
             gps.showSettingsAlert(this)
         }
     }
@@ -450,6 +449,8 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
         intent.putExtra("fechaAsignacion", fechaAsignacion.trim())
         intent.putExtra("direccion", direccion)
         intent.putExtra("ubicacionId", ubicacionId)
+        intent.putExtra("latitud", latitud)
+        intent.putExtra("longitud", longitud)
         startActivity(intent)
         finish()
     }
@@ -678,7 +679,7 @@ class FormReconexionActivity : DaggerAppCompatActivity(), View.OnClickListener {
                             pidePhoto = d.pideFoto
                             pideLectura = d.pideLectura
                             r.codigo_Resultado = d.iD_DetalleGrupo.toString()
-                            r.causaNombre =d.descripcion
+                            r.causaNombre = d.descripcion
                             editTextCausa.setText(d.descripcion)
 
                             if (pideLectura == "NO") {

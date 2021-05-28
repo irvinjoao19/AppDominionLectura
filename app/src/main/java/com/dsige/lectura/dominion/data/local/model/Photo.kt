@@ -19,4 +19,5 @@ open class Photo {
     var longitud: String = ""
     var firm: Int = 0
     var tipoFirma: String = ""
+    var fecha: String = ""
 }

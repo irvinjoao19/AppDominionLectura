@@ -2,6 +2,7 @@ package com.dsige.lectura.dominion.ui.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -15,6 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.dsige.lectura.dominion.R
 import com.dsige.lectura.dominion.data.local.model.SuministroCortes
@@ -60,102 +62,147 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
         mapFragment.getMapAsync(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!this.isGPSEnabled()) {
+            showInfoAlert()
+        }
+    }
+
     override fun onMapReady(p: GoogleMap) {
-        mMap = p
-        zoomToLocation("-12.036175", "-76.999561")
-        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        if (ActivityCompat.checkSelfPermission(
+        val permisos = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            return
-        }
-        mMap.isMyLocationEnabled = true
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 15000, 0f, this)
 
-        when (estado) {
-            2 -> {
-                suministroViewModel.getSuministroLectura(estado, 1, 0).observe(this) {
-                    mMap.clear()
-                    for (s: SuministroLectura in it) {
-                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-                            mMap.addMarker(
-                                MarkerOptions()
-                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-                                    .title(s.iD_Suministro.toString())
-                                    .icon(
-                                        BitmapDescriptorFactory.defaultMarker(
-                                            BitmapDescriptorFactory.HUE_RED
+            mMap = p
+            zoomToLocation("-12.036175", "-76.999561")
+            locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
+            mMap.isMyLocationEnabled = true
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 15000, 0f, this)
+
+            when (estado) {
+                2 -> {
+                    suministroViewModel.getSuministroLectura(estado, 1, 0).observe(this) {
+                        mMap.clear()
+                        for (s: SuministroLectura in it) {
+                            if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                                mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(
+                                            LatLng(
+                                                s.latitud.toDouble(),
+                                                s.longitud.toDouble()
+                                            )
                                         )
-                                    )
-                            )
+                                        .title(s.iD_Suministro.toString())
+                                        .icon(
+                                            BitmapDescriptorFactory.defaultMarker(
+                                                BitmapDescriptorFactory.HUE_RED
+                                            )
+                                        )
+                                )
+                            }
+                        }
+                    }
+                }
+                3 -> {
+                    suministroViewModel.getSuministroCortes(estado, 1).observe(this) {
+                        mMap.clear()
+                        for (s: SuministroCortes in it) {
+                            if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                                mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(
+                                            LatLng(
+                                                s.latitud.toDouble(),
+                                                s.longitud.toDouble()
+                                            )
+                                        )
+                                        .title(s.iD_Suministro.toString())
+                                        .icon(
+                                            BitmapDescriptorFactory.defaultMarker(
+                                                BitmapDescriptorFactory.HUE_RED
+                                            )
+                                        )
+                                )
+                            }
+                        }
+                    }
+                }
+                4 -> {
+                    suministroViewModel.getSuministroReconexion(estado, 1).observe(this) {
+                        mMap.clear()
+                        for (s: SuministroReconexion in it) {
+                            if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                                mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(
+                                            LatLng(
+                                                s.latitud.toDouble(),
+                                                s.longitud.toDouble()
+                                            )
+                                        )
+                                        .title(s.iD_Suministro.toString())
+                                        .icon(
+                                            BitmapDescriptorFactory.defaultMarker(
+                                                BitmapDescriptorFactory.HUE_BLUE
+                                            )
+                                        )
+                                )
+                            }
+                        }
+                    }
+                }
+                9 -> {
+                    suministroViewModel.getSuministroReclamos(estado.toString(), 1).observe(this) {
+                        mMap.clear()
+                        for (s: SuministroLectura in it) {
+                            if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
+                                mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(
+                                            LatLng(
+                                                s.latitud.toDouble(),
+                                                s.longitud.toDouble()
+                                            )
+                                        )
+                                        .title(s.iD_Suministro.toString())
+                                        .icon(
+                                            BitmapDescriptorFactory.defaultMarker(
+                                                BitmapDescriptorFactory.HUE_BLUE
+                                            )
+                                        )
+                                )
+                            }
                         }
                     }
                 }
             }
-            3 -> {
-                suministroViewModel.getSuministroCortes(estado, 1).observe(this) {
-                    mMap.clear()
-                    for (s: SuministroCortes in it) {
-                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-                            mMap.addMarker(
-                                MarkerOptions()
-                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-                                    .title(s.iD_Suministro.toString())
-                                    .icon(
-                                        BitmapDescriptorFactory.defaultMarker(
-                                            BitmapDescriptorFactory.HUE_RED
-                                        )
-                                    )
-                            )
-                        }
-                    }
-                }
-            }
-            4 -> {
-                suministroViewModel.getSuministroReconexion(estado, 1).observe(this) {
-                    mMap.clear()
-                    for (s: SuministroReconexion in it) {
-                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-                            mMap.addMarker(
-                                MarkerOptions()
-                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-                                    .title(s.iD_Suministro.toString())
-                                    .icon(
-                                        BitmapDescriptorFactory.defaultMarker(
-                                            BitmapDescriptorFactory.HUE_BLUE
-                                        )
-                                    )
-                            )
-                        }
-                    }
-                }
-            }
-            9 -> {
-                suministroViewModel.getSuministroReclamos(estado.toString(), 1).observe(this) {
-                    mMap.clear()
-                    for (s: SuministroLectura in it) {
-                        if (s.latitud.isNotEmpty() || s.longitud.isNotEmpty()) {
-                            mMap.addMarker(
-                                MarkerOptions()
-                                    .position(LatLng(s.latitud.toDouble(), s.longitud.toDouble()))
-                                    .title(s.iD_Suministro.toString())
-                                    .icon(
-                                        BitmapDescriptorFactory.defaultMarker(
-                                            BitmapDescriptorFactory.HUE_BLUE
-                                        )
-                                    )
-                            )
-                        }
-                    }
-                }
-            }
+            mMap.setOnMarkerClickListener(this)
+
+        } else {
+            ActivityCompat.requestPermissions(this, permisos, 1)
         }
-        mMap.setOnMarkerClickListener(this)
     }
 
     private fun zoomToLocation(latitud: String, longitud: String) {
@@ -168,17 +215,10 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera))
     }
 
-    private fun isGPSEnabled() {
-        try {
-            val gpsSignal =
-                Settings.Secure.getInt(this.contentResolver, Settings.Secure.LOCATION_MODE)
-            if (gpsSignal == 0) {
-                showInfoAlert()
-            }
-        } catch (e: Settings.SettingNotFoundException) {
-            e.printStackTrace()
-        }
-    }
+    private fun Context.isGPSEnabled() =
+        (getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(
+            LocationManager.GPS_PROVIDER
+        )
 
     private fun showInfoAlert() {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AppTheme))
@@ -202,10 +242,11 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
     }
 
     override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {}
-
+    override fun onProviderEnabled(provider: String) {}
+    override fun onProviderDisabled(provider: String) {}
 
     override fun onMarkerClick(p: Marker): Boolean {
-        dialogResumen(p.title)
+        dialogResumen(p.title!!)
         return true
     }
 
@@ -262,5 +303,6 @@ class PendingLocationMapsActivity : DaggerAppCompatActivity(), OnMapReadyCallbac
         buttonSalir.setOnClickListener {
             dialog.dismiss()
         }
+
     }
 }

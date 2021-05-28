@@ -40,6 +40,7 @@
     <string name="sync">Sincronizando</string>
     <string name="send">Enviando</string>
     <string name="title_send">Enviar Registros</string>
+    <string name="title_photos">Enviar Fotos</string>
     <string name="failedConexion">Sin conexión a internet</string>
     <string name="conectado">Conectada</string>
     <string name="medidor">MEDIDOR :</string>

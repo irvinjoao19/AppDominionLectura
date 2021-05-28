@@ -2,7 +2,6 @@ package com.dsige.lectura.dominion.data.viewModel
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,7 +11,6 @@ import com.dsige.lectura.dominion.data.local.model.Usuario
 import com.dsige.lectura.dominion.data.local.repository.ApiError
 import com.dsige.lectura.dominion.data.local.repository.AppRepository
 import com.dsige.lectura.dominion.helper.Mensaje
-import com.dsige.lectura.dominion.helper.MessageError
 import com.dsige.lectura.dominion.helper.Util
 import com.google.gson.Gson
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
@@ -25,11 +23,8 @@ import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
-import retrofit2.Converter
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ClienteViewModel @Inject
@@ -314,9 +309,7 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<String> {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onNext(t: String) {
-                    Log.i("TAG", t)
-                }
+                override fun onNext(t: String) {}
 
                 override fun onError(t: Throwable) {
                     if (t is HttpException) {
@@ -342,7 +335,7 @@ internal constructor(private val roomRepository: AppRepository, private val retr
         val auditorias = roomRepository.getClienteTaskById(clienteId)
         auditorias.flatMap { c ->
             val json = Gson().toJson(c)
-            Log.i("TAG", json)
+//            Log.i("TAG", json)
             val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json)
             Observable.zip(Observable.just(c), roomRepository.sendCliente(body), { _, mensaje ->
                 mensaje
@@ -350,10 +343,7 @@ internal constructor(private val roomRepository: AppRepository, private val retr
         }.subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Mensaje> {
-                override fun onSubscribe(d: Disposable) {
-                    Log.i("TAG", d.toString())
-                }
-
+                override fun onSubscribe(d: Disposable) {}
                 override fun onNext(t: Mensaje) {}
                 override fun onError(t: Throwable) {
                     if (t is HttpException) {

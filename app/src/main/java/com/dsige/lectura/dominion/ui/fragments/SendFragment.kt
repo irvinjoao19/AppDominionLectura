@@ -2,6 +2,8 @@ package com.dsige.lectura.dominion.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,7 +73,7 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
 
         sendViewModel.getRegistros().observe(viewLifecycleOwner) {
             if (it != null) {
-                if (it.isEmpty()){
+                if (it.isEmpty()) {
                     textViewValue.visibility = View.INVISIBLE
                 }
                 textViewValue.text = it.size.toString()
@@ -89,7 +91,16 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
             btnEnvio.visibility = View.VISIBLE
             btnFile.visibility = View.VISIBLE
             closeLoad()
-            Util.toastMensaje(requireContext(), it)
+            if (it == "Ok") {
+                Looper.myLooper()?.let { i ->
+                    Handler(i).postDelayed({
+                        load("Enviando Registros..")
+                        sendViewModel.sendSuministro()
+                    }, 800)
+                }
+            } else {
+                Util.toastMensaje(requireContext(), it)
+            }
         }
 
         sendViewModel.mensajeError.observe(viewLifecycleOwner) {
@@ -113,10 +124,15 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
                 )
             )
             .setPositiveButton("Aceptar") { dialog, _ ->
-                load()
                 when (tipo) {
-                    1 -> sendViewModel.sendFiles(requireContext())
-                    2 -> sendViewModel.sendPhoto(requireContext())
+                    1 -> {
+                        load("Enviando fotos...")
+                        sendViewModel.sendFiles(requireContext())
+                    }
+                    2 -> {
+                        load("Reenviando fotos...")
+                        sendViewModel.sendPhoto(requireContext())
+                    }
                 }
                 dialog.dismiss()
             }.setNegativeButton("No") { dialog, _ ->
@@ -124,13 +140,13 @@ class SendFragment : DaggerFragment(), View.OnClickListener {
             }.show()
     }
 
-    private fun load() {
+    private fun load(title: String) {
         builder = AlertDialog.Builder(ContextThemeWrapper(requireContext(), R.style.AppTheme))
         @SuppressLint("InflateParams") val view =
             LayoutInflater.from(requireContext()).inflate(R.layout.dialog_login, null)
         val textViewTitle: TextView = view.findViewById(R.id.textViewTitle)
         builder.setView(view)
-        textViewTitle.text = String.format("Enviando...")
+        textViewTitle.text = title
         dialog = builder.create()
         dialog!!.setCanceledOnTouchOutside(false)
         dialog!!.setCancelable(false)

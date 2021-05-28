@@ -154,7 +154,7 @@ class GeneralClientFragment : DaggerFragment(), View.OnClickListener, TextWatche
         clienteViewModel =
             ViewModelProvider(this, viewModelFactory).get(ClienteViewModel::class.java)
 
-        viewPager = activity!!.findViewById(R.id.viewPager)
+        viewPager = requireActivity().findViewById(R.id.viewPager)
         clienteViewModel.getClienteById(clienteId).observe(viewLifecycleOwner) {
             c = it
             when (it.clientePermiteAcceso) {

@@ -1,6 +1,7 @@
 package com.dsige.lectura.dominion.data.local.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dsige.lectura.dominion.data.local.AppDataBase
 import com.dsige.lectura.dominion.data.local.model.*
@@ -525,6 +526,7 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun insertRegistro(r: Registro): Completable {
         return Completable.fromAction {
+            r.iD_Operario = dataBase.usuarioDao().getUsuarioIdTask()
             if (r.estado == 1) {
                 when {
                     r.tipo <= 2 -> dataBase.lecturaDao()
@@ -645,17 +647,22 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
 
     override fun getPhotoTaskFiles(context: Context): Observable<List<Photo>> {
         return Observable.create {
-            val lista = ArrayList<Photo>()
+            val list = ArrayList<Photo>()
             val files = dataBase.photoDao().getPhotosTask()
+            if (files.isEmpty()) {
+                it.onError(Throwable("No hay fotos disponibles por enviar"))
+                it.onComplete()
+                return@create
+            }
 
             files.forEach { p ->
                 val file = File(Util.getFolder(context), p.rutaFoto)
                 if (file.exists()) {
-                    lista.add(p)
+                    list.add(p)
                 }
             }
 
-            it.onNext(lista)
+            it.onNext(list)
             it.onComplete()
         }
     }
@@ -725,21 +732,36 @@ class AppRepoImp(private val apiService: ApiService, private val dataBase: AppDa
     }
 
     override fun getAllPhotos(context: Context): Observable<ArrayList<String>> {
-        return Observable.create { e ->
+        return Observable.create {
             val filePaths: ArrayList<String> = ArrayList()
-            val directory = Util.getFolder(context)
-            val files = directory.listFiles()
-            if (files == null) {
-                e.onError(Throwable("No hay fotos registrados"))
-                e.onComplete()
+//            val directory = Util.getFolder(context)
+//            val files = directory.listFiles()
+//            if (files!!.isEmpty()) {
+//                e.onError(Throwable("No hay fotos registrados"))
+//                e.onComplete()
+//                return@create
+//            }
+
+//            for (i in files.indices) {
+//                filePaths.add(files[i].toString())
+//            }
+
+            val files = dataBase.photoDao().getPhotosTask(Util.getFecha())
+            if (files.isEmpty()) {
+                it.onError(Throwable("No hay fotos disponibles por enviar"))
+                it.onComplete()
                 return@create
             }
 
-            for (i in files.indices) {
-                filePaths.add(files[i].toString())
+            files.forEach { p ->
+                val file = File(Util.getFolder(context), p.rutaFoto)
+                if (file.exists()) {
+                    filePaths.add(file.absolutePath)
+                }
             }
-            e.onNext(filePaths)
-            e.onComplete()
+
+            it.onNext(filePaths)
+            it.onComplete()
         }
     }
 }

@@ -12,6 +12,7 @@ import android.graphics.*
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -42,6 +43,7 @@ import com.dsige.lectura.dominion.data.local.model.Photo
 import com.dsige.lectura.dominion.data.workManager.BatteryWork
 import com.dsige.lectura.dominion.data.workManager.GpsWork
 import com.dsige.lectura.dominion.data.workManager.LecturaWork
+import com.dsige.lectura.dominion.data.workManager.PhotosWork
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -175,9 +177,7 @@ object Util {
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSS")
         val fechaActual = format.format(date)
         return String.format("Firm(%s)_%s_%s_%s.jpg", f, id, tipo, fechaActual)
-
     }
-
 
     fun toggleTextInputLayoutError(textInputLayout: TextInputLayout, msg: String?) {
         textInputLayout.error = msg
@@ -430,11 +430,8 @@ object Util {
 
         try {
             val ei = ExifInterface(photoPath)
-            val orientation =
-                ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-            val degree: Int
 
-            degree = when (orientation) {
+            val degree: Int = when (ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
                 ExifInterface.ORIENTATION_NORMAL -> 0
                 ExifInterface.ORIENTATION_ROTATE_90 -> 90
                 ExifInterface.ORIENTATION_ROTATE_180 -> 180
@@ -548,17 +545,13 @@ object Util {
     @SuppressLint("HardwareIds", "MissingPermission")
     fun getImei(context: Context): String {
         val deviceUniqueIdentifier: String
-        val telephonyManager: TelephonyManager? =
+        val telephonyManager: TelephonyManager =
             context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        deviceUniqueIdentifier = if (telephonyManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                telephonyManager.imei
-            } else {
-                @Suppress("DEPRECATION")
-                telephonyManager.deviceId
-            }
+        deviceUniqueIdentifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            telephonyManager.imei
         } else {
-            Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            @Suppress("DEPRECATION")
+            telephonyManager.deviceId
         }
         return deviceUniqueIdentifier
     }
@@ -857,7 +850,8 @@ object Util {
         context: Context,
         photoPath: String,
         fecha: String,
-        direccion: String
+        direccion: String,
+        coordenadas : String
     ): String {
         try {
             val ei = ExifInterface(photoPath)
@@ -872,7 +866,7 @@ object Util {
                 ExifInterface.ORIENTATION_UNDEFINED -> 0
                 else -> 90
             }
-            return rotateNewImage(context, degree, photoPath, fecha, direccion)
+            return rotateNewImage(context, degree, photoPath, fecha, direccion,coordenadas)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -886,7 +880,8 @@ object Util {
         degree: Int,
         imagePath: String,
         fecha: String,
-        direccion: String
+        direccion: String,
+        coordenadas:String
     ): String {
         try {
             var b: Bitmap = shrinkBitmap(imagePath)
@@ -895,13 +890,13 @@ object Util {
             b = Bitmap.createBitmap(b, 0, 0, b.width, b.height, matrix, true)
 
             val text = String.format(
-                "%s\n%s",
+                "%s\n%s\n%s",
                 if (fecha.isEmpty()) getDateTimeFormatString(Date(File(imagePath).lastModified())) else String.format(
                     "%s %s",
                     fecha,
                     getHoraActual()
                 ),
-                direccion
+                direccion,coordenadas
             )
             b = drawTextToBitmap(context, b, text)
 
@@ -1044,7 +1039,8 @@ object Util {
         return Observable.create {
             val f = File(getFolder(context), "$nameImg.jpg")
             if (f.exists()) {
-                getAngleImage(context, f.absolutePath, fechaAsignacion, direccion)
+                val coordenadas = "Latitud : $latitud  Longitud: $longitud"
+                getAngleImage(context, f.absolutePath, fechaAsignacion, direccion,coordenadas)
                 val photo = Photo()
                 photo.iD_Suministro = receive
                 photo.rutaFoto = "$nameImg.jpg"
@@ -1053,6 +1049,7 @@ object Util {
                 photo.estado = 1
                 photo.latitud = latitud
                 photo.longitud = longitud
+                photo.fecha = getFecha()
                 it.onNext(photo)
                 it.onComplete()
                 return@create
@@ -1137,14 +1134,26 @@ object Util {
         WorkManager.getInstance(context).cancelAllWorkByTag("Gps-Work")
     }
 
+    fun executePhotosWork(context: Context) {
+        val locationWorker =
+            PeriodicWorkRequestBuilder<PhotosWork>(2, TimeUnit.HOURS)
+                .build()
+        WorkManager
+            .getInstance(context)
+            .enqueueUniquePeriodicWork(
+                "Photos-Work",
+                ExistingPeriodicWorkPolicy.REPLACE,
+                locationWorker
+            )
+    }
+
+    fun closePhotosWork(context: Context) {
+        WorkManager.getInstance(context).cancelAllWorkByTag("Photos-Work")
+    }
+
     fun executeBatteryWork(context: Context) {
-//        val downloadConstraints = Constraints.Builder()
-//            .setRequiresCharging(true)
-//            .setRequiredNetworkType(NetworkType.CONNECTED)
-//            .build()
         val locationWorker =
             PeriodicWorkRequestBuilder<BatteryWork>(15, TimeUnit.MINUTES)
-//                .setConstraints(downloadConstraints)
                 .build()
         WorkManager
             .getInstance(context)
@@ -1163,6 +1172,12 @@ object Util {
         val date = Date()
         @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("ddMMyyyy_HHmmssSSSS")
         return String.format("%s_%s.jpg", code, format.format(date))
+    }
+
+    fun getFechaFolder() : String{
+        val date = Date()
+        @SuppressLint("SimpleDateFormat") val format =SimpleDateFormat("ddMMyyyy")
+        return format.format(date)
     }
 
     fun getFechaSuministro(id: Int, tipo: Int, fecha: String): String {

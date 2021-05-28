@@ -117,6 +117,7 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
             "Servicio Gps" -> {
                 Util.executeGpsWork(this)
                 Util.executeBatteryWork(this)
+                Util.executePhotosWork(this)
             }
             "Recuperación de Fotos" -> changeFragment(
                 RecuperacionFragment.newInstance("", ""), item.title.toString()
@@ -224,6 +225,7 @@ class MainActivity : DaggerAppCompatActivity(), NavigationView.OnNavigationItemS
                         logout = "on"
                         Util.closeGpsWork(this)
                         Util.closeBatteryWork(this)
+                        Util.closePhotosWork(this)
                         load("Cerrando Session")
                         usuarioViewModel.logout()
                     }

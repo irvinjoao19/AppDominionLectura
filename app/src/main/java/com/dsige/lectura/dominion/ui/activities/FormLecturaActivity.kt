@@ -132,9 +132,9 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var grupoId: Int = 0
     private var ubicacionId: Int = 0
     private var direccion: String = ""
+    private var latitud: String = ""
+    private var longitud: String = ""
 
-    private var latitud = ""
-    private var longitud = ""
     private var suministro_Numero = ""
     private var tipo: Int = 0
     private var lecturaManual: Int = 0
@@ -211,7 +211,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         editTextDialogObservacion.setOnClickListener(this)
 
         suministroViewModel.mensajeSuccess.observe(this) {
-            buttonGrabar.visibility = View.VISIBLE
             if (it == "photo") {
                 goToPhoto()
             } else {
@@ -221,7 +220,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
         }
         suministroViewModel.mensajeError.observe(this) {
-            buttonGrabar.visibility = View.VISIBLE
             Util.toastMensaje(this, it)
         }
     }
@@ -648,14 +646,12 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun formRegistro() {
-        buttonGrabar.visibility = View.INVISIBLE
         val valConfirm: String = editTextLectura.text.toString()
         val lectura: Int = if (valConfirm.isEmpty()) 0 else valConfirm.toInt()
         val gps = Gps(this)
         if (gps.isLocationEnabled()) {
             if (gps.getLatitude().toString() == "0.0" || gps.getLongitude().toString() == "0.0") {
                 gps.showAlert(this)
-                buttonGrabar.visibility = View.VISIBLE
             } else {
                 Util.hideKeyboard(this)
                 r.registro_Latitud = gps.getLatitude().toString()
@@ -684,7 +680,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
         } else {
             gps.showSettingsAlert(this)
-            buttonGrabar.visibility = View.VISIBLE
         }
     }
 
@@ -746,7 +741,6 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
             }
         }
         buttonCancelar.setOnClickListener {
-            buttonGrabar.visibility = View.VISIBLE
             dialog.cancel()
         }
     }
@@ -774,6 +768,8 @@ class FormLecturaActivity : DaggerAppCompatActivity(), View.OnClickListener {
         intent.putExtra("fechaAsignacion", fechaAsignacion.trim())
         intent.putExtra("direccion", direccion)
         intent.putExtra("ubicacionId", ubicacionId)
+        intent.putExtra("latitud", latitud)
+        intent.putExtra("longitud", longitud)
         startActivity(intent)
         finish()
     }

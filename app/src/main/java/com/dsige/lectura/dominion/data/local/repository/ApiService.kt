@@ -37,7 +37,8 @@ interface ApiService {
     fun saveOperarioGps(@Body gps: RequestBody): Observable<Mensaje>
 
     @Headers("Cache-Control: no-cache")
-    @POST("SavePhotos")
+//    @POST("SavePhotos")
+    @POST("SaveFile")
     fun sendPhotos(@Body body: RequestBody): Observable<String>
 
     @Headers("Cache-Control: no-cache")

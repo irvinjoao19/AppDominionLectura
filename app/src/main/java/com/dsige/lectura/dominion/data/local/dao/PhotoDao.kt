@@ -25,10 +25,13 @@ interface PhotoDao {
     @Query("SELECT * FROM Photo WHERE estado= 1 ")
     fun getPhotosTask(): List<Photo>
 
+    @Query("SELECT * FROM Photo WHERE fecha =:f")
+    fun getPhotosTask(f:String): List<Photo>
+
     @Query("SELECT * FROM Photo WHERE estado= 1 ")
     fun getPhotos(): LiveData<List<Photo>>
 
-    @Query("DELETE FROM Photo")
+    @Query("UPDATE Photo set estado = 0")
     fun deleteAll()
 
     @Query("SELECT * FROM Photo WHERE iD_Suministro=:id AND tipo=:t AND conformidad=:i AND estado != 2 ORDER BY iD_Foto ASC")

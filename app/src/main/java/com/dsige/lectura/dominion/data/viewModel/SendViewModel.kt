@@ -1,7 +1,6 @@
 package com.dsige.lectura.dominion.data.viewModel
 
 import android.content.Context
-//import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,7 +32,6 @@ internal constructor(private val roomRepository: AppRepository, private val retr
     val mensajeError = MutableLiveData<String>()
     val mensajeSuccess = MutableLiveData<String>()
     val servicios: MutableLiveData<List<Servicio>> = MutableLiveData()
-    val lecturas: MutableLiveData<IntArray> = MutableLiveData()
 
     fun setError(s: String) {
         mensajeError.value = s
@@ -47,7 +45,11 @@ internal constructor(private val roomRepository: AppRepository, private val retr
                 b.setType(MultipartBody.FORM)
                 val file = File(i)
                 if (file.exists()) {
-                    b.addFormDataPart("files", file.name, RequestBody.create(MediaType.parse("multipart/form-data"), file))
+                    b.addFormDataPart(
+                        "files",
+                        file.name,
+                        RequestBody.create(MediaType.parse("multipart/form-data"), file)
+                    )
                 }
                 val body = b.build()
                 Observable.zip(
@@ -60,9 +62,8 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             .delay(600, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<String> {
-                override fun onSubscribe(d: Disposable) {                }
+                override fun onSubscribe(d: Disposable) {}
                 override fun onNext(t: String) {}
-
                 override fun onError(t: Throwable) {
                     if (t is HttpException) {
                         val body = t.response().errorBody()
@@ -109,28 +110,22 @@ internal constructor(private val roomRepository: AppRepository, private val retr
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<String> {
                 override fun onSubscribe(d: Disposable) {}
-                override fun onComplete() {
-                    sendSuministro()
-                }
-
                 override fun onNext(t: String) {}
                 override fun onError(t: Throwable) {
                     if (t is HttpException) {
-                        val body = t.response().errorBody()
-                        try {
-                            val error = retrofit.errorConverter.convert(body!!)
-                            mensajeError.postValue(error!!.Message)
-                        } catch (e1: IOException) {
-                            e1.printStackTrace()
-                        }
+                        mensajeError.postValue(t.message())
                     } else {
                         mensajeError.postValue(t.message)
                     }
                 }
+
+                override fun onComplete() {
+                    mensajeSuccess.value = "Ok"
+                }
             })
     }
 
-    private fun sendSuministro() {
+      fun sendSuministro() {
         val register: Observable<List<Registro>> = roomRepository.getRegistrosTask()
         register.flatMap { observable ->
             Observable.fromIterable(observable).flatMap { a ->
@@ -141,7 +136,8 @@ internal constructor(private val roomRepository: AppRepository, private val retr
                 Observable.zip(
                     Observable.just(a),
                     roomRepository.sendRegistro(body), { _, m -> m })
-            }
+            }.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Mensaje> {
@@ -161,7 +157,7 @@ internal constructor(private val roomRepository: AppRepository, private val retr
                             val error = retrofit.errorConverter.convert(body!!)
                             mensajeError.postValue(error!!.Message)
                         } catch (e1: IOException) {
-                            e1.printStackTrace()
+                            mensajeError.postValue(e1.toString())
                         }
                     } else {
                         mensajeError.postValue(t.message)

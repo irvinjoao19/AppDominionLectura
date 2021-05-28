@@ -1,7 +1,6 @@
 package com.dsige.lectura.dominion.data.workManager
 
 import android.content.Context
-import android.util.Log
 import androidx.work.ListenableWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -10,7 +9,6 @@ import com.dsige.lectura.dominion.data.local.repository.AppRepository
 import com.dsige.lectura.dominion.helper.Mensaje
 import com.dsige.lectura.dominion.helper.Util
 import com.google.gson.Gson
-import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import io.reactivex.CompletableObserver
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -21,7 +19,6 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
-import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -69,13 +66,10 @@ internal constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<String> {
                 override fun onSubscribe(d: Disposable) {}
+                override fun onNext(t: String) {}
+                override fun onError(t: Throwable) {}
                 override fun onComplete() {
                     sendSuministro()
-                }
-
-                override fun onNext(t: String) {}
-                override fun onError(t: Throwable) {
-                    Log.i("TAG", t.message.toString())
                 }
             })
     }
@@ -85,7 +79,6 @@ internal constructor(
         register.flatMap { observable ->
             Observable.fromIterable(observable).flatMap { a ->
                 val json = Gson().toJson(a)
-                Log.i("TAG", json)
                 val body =
                     RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json)
                 Observable.zip(
@@ -97,13 +90,9 @@ internal constructor(
             .subscribe(object : Observer<Mensaje> {
                 override fun onSubscribe(d: Disposable) {}
                 override fun onComplete() {}
-
+                override fun onError(t: Throwable) {}
                 override fun onNext(t: Mensaje) {
                     updateEnableRegistro(t)
-                }
-
-                override fun onError(t: Throwable) {
-                    Log.i("TAG", t.message.toString())
                 }
             })
     }

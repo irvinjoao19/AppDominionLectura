@@ -44,12 +44,26 @@
         <activity android:name=".ui.activities.ReconexionFirmActivity" />
         <activity
             android:name=".ui.activities.PhotoActivity"
+            android:configChanges="orientation"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-        <activity android:name=".ui.activities.FormReconexionActivity" />
-        <activity android:name=".ui.activities.FormCorteActivity" />
+        <activity
+            android:name=".ui.activities.FormReconexionActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.FormCorteActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.FormLecturaActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
         <activity android:name=".ui.activities.BigClientsActivity" />
-        <activity android:name=".ui.activities.FormLecturaActivity" />
         <activity android:name=".ui.activities.PendingLocationMapsActivity" />
         <activity android:name=".ui.activities.PreviewCameraActivity" />
 

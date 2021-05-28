@@ -69,6 +69,8 @@ class ReconexionFirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var estado: Int = 0
     private var fechaAsignacion: String = ""
     private var direccion: String = ""
+    private var latitud: String = ""
+    private var longitud: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,6 +87,8 @@ class ReconexionFirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
             estado = b.getInt("estado")
             fechaAsignacion = b.getString("fechaAsignacion", "")
             direccion = b.getString("direccion", "")
+            latitud = b.getString("latitud", "")
+            longitud = b.getString("longitud", "")
             bindUI()
         }
     }
@@ -106,6 +110,8 @@ class ReconexionFirmActivity : DaggerAppCompatActivity(), View.OnClickListener {
             intent.putExtra("suministro", suministro)
             intent.putExtra("fechaAsignacion", fechaAsignacion)
             intent.putExtra("direccion", direccion)
+            intent.putExtra("latitud", latitud)
+            intent.putExtra("longitud", longitud)
             startActivity(intent)
             finish()
         }

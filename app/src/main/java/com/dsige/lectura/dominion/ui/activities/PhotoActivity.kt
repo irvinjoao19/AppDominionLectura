@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
@@ -49,6 +50,18 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     }
 
     private fun formPhoto() {
+        val gps = Gps(this)
+        if (gps.isLocationEnabled()) {
+            if (latitud.isEmpty()) {
+                latitud = gps.getLatitude().toString()
+            }
+            if (longitud.isEmpty()) {
+                longitud = gps.getLongitude().toString()
+            }
+        } else {
+            gps.showSettingsAlert(this)
+            return
+        }
         buttonPhoto.visibility = View.INVISIBLE
         when {
             tipo <= 2 || tipo == 9 || tipo == 10 -> {
@@ -128,7 +141,8 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     private var direction: String = ""
     private var nameImg: String = ""
     private var ubicacionId: Int = 0
-
+    private var latitud: String = ""
+    private var longitud: String = ""
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -140,18 +154,20 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photo)
-        val bundle = intent.extras
-        if (bundle != null) {
-            receive = bundle.getInt("envioId")
-            titulo = bundle.getString("nombre")!!
-            orden = bundle.getInt("orden")
-            orden2 = bundle.getInt("orden_2")
-            tipo = bundle.getInt("tipo")
-            estado = bundle.getInt("estado")
-            suministro = bundle.getString("suministro", "")
-            fechaAsignacion = bundle.getString("fechaAsignacion", "")
-            direction = bundle.getString("direccion", "")
-            ubicacionId = bundle.getInt("ubicacionId")
+        val b = intent.extras
+        if (b != null) {
+            receive = b.getInt("envioId")
+            titulo = b.getString("nombre", "")
+            orden = b.getInt("orden")
+            orden2 = b.getInt("orden_2")
+            tipo = b.getInt("tipo")
+            estado = b.getInt("estado")
+            suministro = b.getString("suministro", "")
+            fechaAsignacion = b.getString("fechaAsignacion", "")
+            direction = b.getString("direccion", "")
+            ubicacionId = b.getInt("ubicacionId")
+            latitud = b.getString("latitud", "")
+            longitud = b.getString("longitud", "")
             bindUI(receive, tipo)
         }
     }
@@ -203,10 +219,6 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
 
 
         suministroViewModel.getPhotoAllBySuministro(id, tipo, 0).observe(this) {
-//            if (it.isEmpty()) {
-//                goCamera()
-//            }
-
             cantidad = it.size
             photoAdapter.addItems(it)
         }
@@ -239,6 +251,8 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     intent.putExtra("nombre", titulo)
                     intent.putExtra("fechaAsignacion", fechaAsignacion)
                     intent.putExtra("direccion", direction)
+                    intent.putExtra("latitud", latitud)
+                    intent.putExtra("longitud", longitud)
                     startActivity(intent)
                     finish()
                 } else {
@@ -342,7 +356,6 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                     val uriSavedImage = FileProvider.getUriForFile(
                         this, BuildConfig.APPLICATION_ID + ".fileprovider", it
                     )
-
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage)
 
                     if (Build.VERSION.SDK_INT >= 24) {
@@ -354,33 +367,46 @@ class PhotoActivity : DaggerAppCompatActivity(), View.OnClickListener {
                             e.printStackTrace()
                         }
                     }
-                    startActivityForResult(takePictureIntent, Permission.CAMERA_REQUEST)
+//                    startActivityForResult(takePictureIntent, Permission.CAMERA_REQUEST)
+                    resultLauncher.launch(takePictureIntent)
                 }
             }
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == Permission.CAMERA_REQUEST && resultCode == RESULT_OK) {
-            val gps = Gps(this)
-            if (gps.isLocationEnabled()) {
+    private val resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
                 suministroViewModel.generarArchivo(
                     nameImg,
                     this@PhotoActivity,
                     fechaAsignacion,
                     direction,
-                    gps.getLatitude().toString(),
-                    gps.getLongitude().toString(),
+                    latitud,
+                    longitud,
                     receive,
                     tipo
                 )
-            } else {
-                gps.showSettingsAlert(this)
             }
+            buttonPhoto.visibility = View.VISIBLE
         }
-        buttonPhoto.visibility = View.VISIBLE
-    }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == Permission.CAMERA_REQUEST && resultCode == RESULT_OK) {
+//            suministroViewModel.generarArchivo(
+//                nameImg,
+//                this@PhotoActivity,
+//                fechaAsignacion,
+//                direction,
+//                latitud,
+//                longitud,
+//                receive,
+//                tipo
+//            )
+//        }
+//        buttonPhoto.visibility = View.VISIBLE
+//    }
 
     private fun updateData(receive: Int, tipo: Int, guardar: Boolean) {
         when {

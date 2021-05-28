@@ -25,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import org.jetbrains.annotations.NotNull
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, TaskLoadedCallback {
 
@@ -44,10 +45,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var longitud: String = ""
     private var title: String = ""
 
-    override fun onResume() {
-        super.onResume()
-        isGPSEnabled()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +57,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
             mapFragment.getMapAsync(this)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!this.isGPSEnabled()) {
+            showInfoAlert()
         }
     }
 
@@ -122,12 +126,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera))
     }
 
-    private fun isGPSEnabled() {
-        val gpsSignal = Settings.Secure.getInt(this.contentResolver, Settings.Secure.LOCATION_MODE)
-        if (gpsSignal == 0) {
-            showInfoAlert()
-        }
-    }
+    private fun Context.isGPSEnabled() =
+        (getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(
+            LocationManager.GPS_PROVIDER
+        )
 
     private fun showInfoAlert() {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AppTheme))

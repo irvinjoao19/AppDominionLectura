@@ -88,7 +88,8 @@
                     android:visibility="gone"
                     app:backgroundTint="@color/colorPrimary"
                     app:srcCompat="@drawable/ic_camera"
-                    app:tint="@color/colorWhite" />
+                    app:tint="@color/colorWhite"
+                    android:contentDescription="@string/img" />
             </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -131,7 +132,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -167,7 +169,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -203,7 +206,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
 
@@ -260,7 +264,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
 
@@ -310,7 +315,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView10"
                     app:srcCompat="@drawable/ic_camera"
-                    app:tint="@color/colorWhite" />
+                    app:tint="@color/colorWhite"
+                    android:contentDescription="@string/img" />
 
                 <TextView
                     android:id="@+id/textView21"
@@ -338,7 +344,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView11"
                     app:srcCompat="@drawable/ic_camera"
-                    app:tint="@color/colorWhite" />
+                    app:tint="@color/colorWhite"
+                    android:contentDescription="@string/img" />
 
                 <LinearLayout
                     android:id="@+id/textView22"
@@ -374,7 +381,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -410,7 +418,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -446,7 +455,8 @@
                         android:layout_marginEnd="16dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -485,7 +495,8 @@
                         android:visibility="gone"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -524,7 +535,8 @@
                         android:visibility="gone"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <TextView
@@ -553,7 +565,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView15"
                     app:srcCompat="@drawable/ic_camera"
-                    app:tint="@color/colorWhite" />
+                    app:tint="@color/colorWhite"
+                    android:contentDescription="@string/img" />
 
                 <LinearLayout
                     android:id="@+id/textView17"
@@ -592,7 +605,8 @@
                         android:visibility="gone"
                         app:backgroundTint="@color/colorPrimary"
                         app:srcCompat="@drawable/ic_camera"
-                        app:tint="@color/colorWhite" />
+                        app:tint="@color/colorWhite"
+                        android:contentDescription="@string/img" />
                 </LinearLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
